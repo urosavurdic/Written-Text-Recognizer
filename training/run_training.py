@@ -10,3 +10,4 @@ from text_recognizer import lit_models
 
 np.random.seed(42)
 torch.manual_seed(42)
+
