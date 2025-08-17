@@ -19,8 +19,8 @@ class MNIST(BaseDataModule):
             transforms.Normalize((0.1307,), (0.3081,))
         ])
         self.dim = (1, 28, 28)  # MNIST images are grayscale and 28x28 pixels
-        self.output_dim = (1,)
-        self.char_to_idx = {'<S>': 0, '<E>': 1, '<P>': 2}
+        self.output_dim = (1,) # MNIST has a single output dimension (the digit)
+        self.char_to_idx = {'<S>': 0, '<E>': 1, '<P>': 2} # Start, End, and Padding tokens.
 
     def prepare_data(self):
         """
