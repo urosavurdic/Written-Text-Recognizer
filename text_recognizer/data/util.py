@@ -22,6 +22,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.target = target
         self.transform = transform
         self.target_transform = target_transform
+        # self.num_classes = len(set(target)) if isinstance(target, (list, tuple)) else target.size(0) if isinstance(target, torch.Tensor) else None
     
     def __len__(self):
         """
