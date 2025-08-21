@@ -1,9 +1,19 @@
+# Python
 __pycache__/
 *.py[cod]
-logs/
-training/logs/
-*.ckpt
-*.pth
+
+# Virtual environment
 venv/
 .env/
+
+# Jupyter
 .ipynb_checkpoints/
+
+# Data
+datasets/
+
+# Logs and checkpoints
+logs/
+checkpoints/
+*.ckpt
+*.pth

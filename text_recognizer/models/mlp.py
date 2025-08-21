@@ -16,10 +16,10 @@ class MLP(nn.Module):
 
     def __init__(self, data_config: Dict[str, Any], args: argparse.Namespace = None):
         super().__init__()
-        self.args = args if args is not None else {}
+        self.args = vars(args) if args is not None else {}
 
         input_dim = np.prod(data_config['input_dim'])
-        num_classes = len(data_config['char_to_idx'])
+        num_classes = self.args.get('num_classes', data_config['num_classes'])
 
         fc1_dim = self.args.get('fc1', FC1_SIZE)
         fc2_dim = self.args.get('fc2', FC2_SIZE)
@@ -48,7 +48,7 @@ class MLP(nn.Module):
         return x
     
     @staticmethod
-    def add_arguments(parser: argparse.ArgumentParser):
+    def add_to_argparse(parser: argparse.ArgumentParser):
         """
         Adds command line arguments specific to the MLP model.
         Args:

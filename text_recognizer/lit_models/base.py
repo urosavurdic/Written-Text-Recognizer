@@ -1,10 +1,11 @@
 import argparse
 import torch
 import pytorch_lightning as pl
+from torchmetrics import Accuracy
 
 OPTIMIZER = 'Adam'
 LR = 1e-3
-LOSS = 'cross_entropy'
+LOSS = 'CrossEntropyLoss'
 
 class BaseModel(pl.LightningModule):
     """
@@ -21,7 +22,8 @@ class BaseModel(pl.LightningModule):
     def __init__(self, model, args: argparse.Namespace = None):
         super().__init__()
         self.model = model
-        self.args = args if args is not None else {}
+        self.args = vars(args) if args is not None else {}
+        num_classes = self.args.get('num_classes', 10)  # Default to 10 classes if not specified
 
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)
@@ -29,11 +31,11 @@ class BaseModel(pl.LightningModule):
 
         loss = self.args.get('loss', LOSS)
         if not loss == "transformer":
-            self.loss_fn = getattr(torch.nn, loss)
+            self.loss_fn = getattr(torch.nn, loss)()
 
-        self.train_acc = pl.metrics.Accuracy()
-        self.val_acc = pl.metrics.Accuracy()
-        self.test_acc = pl.metrics.Accuracy()
+        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
     
     def configure_optimizers(self):
         """

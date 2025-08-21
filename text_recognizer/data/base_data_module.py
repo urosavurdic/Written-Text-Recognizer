@@ -35,13 +35,14 @@ class BaseDataModule(pl.LightningDataModule):
         self.dim = None
         self.output_dim = None
         self.char_to_idx = None
+        self.num_classes = None
 
     @classmethod
     def data_directory_path(cls):
         """
         Returns the path to the directory where the dataset is stored.
         """
-        return Path(__file__).resolve().parents[3] / 'data'
+        return Path(__file__).resolve().parents[1] / 'data' / 'datasets'
     
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser):
@@ -67,7 +68,8 @@ class BaseDataModule(pl.LightningDataModule):
             'num_workers': self.num_workers,
             'input_dim': self.dim,
             'output_dim': self.output_dim,
-            'char_to_idx': self.char_to_idx
+            'char_to_idx': self.char_to_idx,
+            'num_classes' : self.num_classes
         }
     
     def prepare_data(self):
