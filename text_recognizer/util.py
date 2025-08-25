@@ -13,12 +13,13 @@ import os
 import numpy as np
 import cv2
 from tqdm import tqdm
+from urllib.request import urlopen, urlretrieve
 
 def to_categorical(y, num_classes):
     """
     Converts a class vector (integers) to binary class matrix.
     """
-    return np.eye(num_classes, dtype='unit8')[y]
+    return np.eye(num_classes, dtype='uint8')[y]
 
 def read_image(image_uri: Union[str, Path], grayscale: bool = False) -> np.array:
     """"
@@ -89,8 +90,12 @@ class TqdmUpTo(tqdm):
         """
         Downloads a file from a URL and shows progress.
         """
-        with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=filename) as t:
-            urlretrieve(url, filename, reporthook=t.update_to, data=None)
+        filename_str = str(filename)
+        with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc=filename_str) as t:
+            urlretrieve(url, filename_str, reporthook=t.update_to, data=None)
 
+def download_url(url, filename):
+    downloader = TqdmUpTo()
+    downloader.download_url(url, filename)
 
     

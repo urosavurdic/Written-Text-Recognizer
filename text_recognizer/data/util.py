@@ -64,12 +64,15 @@ def convert_str_to_labels(text: str, char_to_idx: Dict[str, int], max_length: in
         text (str): The input string to convert.
         char_to_idx (Dict[str, int]): A dictionary mapping characters to their corresponding indices, including special tokens.
         max_length (int, optional): The maximum length of the output tensor. If provided, the output will be padded or truncated to this length.
+    Returns:
+
 
     """
-    tokens = ["<S>"] + list(text) + ["<E>"]  # Add start and end tokens
     labels = torch.ones((max_length), dtype=torch.long) * char_to_idx['<P>'] # Padding character
-    for i, token in enumerate(tokens[:max_length]): # 
-        labels[i] = char_to_idx[token]
+    for i, string in enumerate(text):
+        tokens = ["<S>"] + list(string) + ["<E>"]  # Add start and end tokens
+        for j, token in enumerate(tokens):
+            labels[i, j] = char_to_idx[token]
     
     return labels
 
