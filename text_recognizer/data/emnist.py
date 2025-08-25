@@ -51,7 +51,7 @@ class EMNIST(BaseDataModule):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f) # Load the essentials from the JSON file
 
-        self.char_to_idx = list(essentials['char_to_idx']) # Convert the character to index mapping to a list
+        self.char_to_idx = essentials['char_to_idx'] # Convert the character to index mapping to a list
         self.inverse_char_to_idx = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
         self.transform = transforms.Compose([
             transforms.ToTensor(),
