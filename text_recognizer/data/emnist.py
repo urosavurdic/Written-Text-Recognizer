@@ -110,6 +110,12 @@ def _download_and_process_emnist():
     """
     Downloads and processes the EMNIST dataset, saving it in a processed format.
     """
+    if not RAW_DATA_DIRNAME.exists():
+        RAW_DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
+        print(f"Created raw data directory at {RAW_DATA_DIRNAME}")
+    else:
+        print(f"Raw data directory already exists at {RAW_DATA_DIRNAME}")
+        
      # Create metadata.toml if it doesn't exist
     if not METADATA_FILENAME.exists():
         toml.dump(METADATA_CONTENT, METADATA_FILENAME)
