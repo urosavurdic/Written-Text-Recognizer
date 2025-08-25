@@ -23,7 +23,8 @@ class BaseModel(pl.LightningModule):
         super().__init__()
         self.model = model
         self.args = vars(args) if args is not None else {}
-        num_classes = self.args.get('num_classes', 10)  # Default to 10 classes if not specified
+        ##### FLAG: Never takes real num_classes
+        num_classes = self.args.get('num_classes', 66)  # Default to 10 classes if not specified 
 
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)
