@@ -10,7 +10,8 @@ venv/
 .ipynb_checkpoints/
 
 # Data
-datasets/
+downloaded/
+processed/
 
 # Logs and checkpoints
 logs/
