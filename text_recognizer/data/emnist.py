@@ -28,7 +28,11 @@ PROCESSED_DATA_DIRNAME = BaseDataModule.data_directory_path() / "processed" / "e
 PROCESSED_DATA_FILENAME = PROCESSED_DATA_DIRNAME / "byclass.h5"
 ESSENTIALS_FILENAME = Path(__file__).parents[0].resolve() / "emnist_essentials.json"
 
-
+METADATA_CONTENT = {
+    "filename": "matlab.zip",
+    "sha256": "e1fa805cdeae699a52da0b77c2db17f6feb77eed125f9b45c022e7990444df95",
+    "url": "https://s3-us-west-2.amazonaws.com/fsdl-public-assets/matlab.zip"
+}
 
 
 class EMNIST(BaseDataModule):
@@ -106,6 +110,11 @@ def _download_and_process_emnist():
     """
     Downloads and processes the EMNIST dataset, saving it in a processed format.
     """
+     # Create metadata.toml if it doesn't exist
+    if not METADATA_FILENAME.exists():
+        toml.dump(METADATA_CONTENT, METADATA_FILENAME)
+        print(f"Created metadata.toml at {METADATA_FILENAME}")
+    
     metadata = toml.load(METADATA_FILENAME)
     _download_raw_data(metadata, DL_DATA_DIRNAME)
     _process_raw_data(metadata["filename"], DL_DATA_DIRNAME)
