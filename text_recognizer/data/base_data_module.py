@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Collection, Optional, Tuple, Union
 import argparse
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchvision import transforms
 from text_recognizer import util
+from text_recognizer.data.util import BaseDataset
 
 
 BATCH_SIZE = 128
@@ -31,11 +32,15 @@ class BaseDataModule(pl.LightningDataModule):
         self.batch_size = self.args.get('batch_size', BATCH_SIZE)
         self.num_workers = self.args.get('num_workers', NUM_WORKERS)
 
+        self.on_gpu = isinstance(self.args.get("gpus", None), (str, int))
+
         # to be set in subclasses
-        self.dim = None
-        self.output_dim = None
-        self.char_to_idx = None
-        self.num_classes = None
+        self.dim: Tuple[int, ...]
+        self.output_dim: Tuple[int, ...]
+        self.char_to_idx: Collection
+        self.data_train: Union[BaseDataset, ConcatDataset]
+        self.data_val: Union[BaseDataset, ConcatDataset]
+        self.data_test: Union[BaseDataset, ConcatDataset]
 
     @classmethod
     def data_directory_path(cls):
@@ -68,8 +73,7 @@ class BaseDataModule(pl.LightningDataModule):
             'num_workers': self.num_workers,
             'input_dim': self.dim,
             'output_dim': self.output_dim,
-            'char_to_idx': self.char_to_idx,
-            'num_classes' : self.num_classes
+            'char_to_idx': self.char_to_idx
         }
     
     def prepare_data(self):
@@ -83,30 +87,28 @@ class BaseDataModule(pl.LightningDataModule):
         """
         Sets up the data for training, validation, and testing.
         """
-        self.data_train = None
-        self.data_val = None
-        self.data_test = None
+        pass
 
     def train_dataloader(self):
         """
         Returns:
             DataLoader: Data loader for the training dataset.
         """
-        return DataLoader(self.data_train, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True)
+        return DataLoader(self.data_train, shuffle=True, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=self.on_gpu)
     
     def val_dataloader(self):
         """
         Returns:
             DataLoader: Data loader for the validation dataset.
         """
-        return DataLoader(self.data_val, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True)
+        return DataLoader(self.data_val, shuffle=False, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=self.on_gpu)
     
     def test_dataloader(self):
         """
         Returns:
             DataLoader: Data loader for the test dataset.
         """
-        return DataLoader(self.data_test, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=True)
+        return DataLoader(self.data_test, shuffle=False, batch_size=self.batch_size, num_workers=self.num_workers, pin_memory=self.on_gpu)
 
 def load_and_print_info(data_module: type) -> None:
 
@@ -129,7 +131,7 @@ def _download_raw_data(metadata: Dict, dl_dirname: Path) -> Path:
     filename = dl_dirname / metadata['filename']
     if filename.exists():
         print(f"File {filename} already exists. Skipping download.")
-        return
+        return filename
     print(f"Downloading {metadata['url']} to {filename}")
     util.download_url(metadata['url'], filename)
     print("Computing sha256 checksum...")
