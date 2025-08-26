@@ -3,6 +3,7 @@ import torch
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
+from torchmetrics import Accuracy as TorchAccuracy
 
 
 OPTIMIZER = 'Adam'
@@ -10,21 +11,16 @@ LR = 1e-3
 LOSS = 'CrossEntropyLoss'
 ONE_CYCLE_TOTAL_STEPS = 100
 
-class Accuracy(pl.metrics.Accuracy):
+class Accuracy(TorchAccuracy):
     """Accuracy Metric with a hack."""
 
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
         """
-        Metrics in Pytorch-lightning 1.2+ versions expect preds to be between 0 and 1 else fails with the ValueError:
-        "The `preds` should be probabilities, but values were detected outside of [0,1] range."
-        This is being tracked as a bug in https://github.com/PyTorchLightning/metrics/issues/60.
-        This method just hacks around it by normalizing preds before passing it in.
-        Normalized preds are not necessary for accuracy computation as we just care about argmax().
+        Hack for PyTorch Lightning 1.2+ softmax issue.
         """
         if preds.min() < 0 or preds.max() > 1:
             preds = F.softmax(preds, dim=-1)
         super().update(preds=preds, target=target)
-
 class BaseModel(pl.LightningModule):
     """
     Base class for all models in the text recognizer project. It provides a common interface for model initialization:
