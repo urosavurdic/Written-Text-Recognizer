@@ -14,8 +14,8 @@ ONE_CYCLE_TOTAL_STEPS = 100
 class Accuracy(TorchAccuracy):
     """Accuracy Metric with a hack."""
 
-    def __init__(self):
-        super().__init__(task="multiclass")
+    def __init__(self, *args, **kwargs):
+        super().__init__(task="multiclass", *args, **kwargs)
 
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
         """
