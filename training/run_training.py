@@ -80,7 +80,7 @@ def main():
     data = data_class(args)
     model = model_class(data_config=data.configuration(), args=args)
 
-    lit_model = lit_models.BaseModel(model, args=args)
+    lit_model = lit_models.BaseModel(model, args=args, num_classes=data.num_classes)
 
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
 
