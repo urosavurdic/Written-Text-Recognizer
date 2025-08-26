@@ -3,7 +3,7 @@ import torch
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torchmetrics import Accuracy as TorchAccuracy
+from torchmetrics import Accuracy
 
 
 OPTIMIZER = 'Adam'
@@ -11,19 +11,20 @@ LR = 1e-3
 LOSS = 'cross_entropy'
 ONE_CYCLE_TOTAL_STEPS = 100
 
+"""
 class Accuracy(TorchAccuracy):
-    """Accuracy Metric with a hack."""
+    #Accuracy Metric with a hack.
 
     def __init__(self, *args, **kwargs):
         super().__init__(task="multiclass", *args, **kwargs)
 
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
-        """
-        Hack for PyTorch Lightning 1.2+ softmax issue.
-        """
+        #Hack for PyTorch Lightning 1.2+ softmax issue.
         if preds.min() < 0 or preds.max() > 1:
             preds = F.softmax(preds, dim=-1)
         super().update(preds=preds, target=target)
+
+"""
 class BaseModel(pl.LightningModule):
     """
     Base class for all models in the text recognizer project. It provides a common interface for model initialization:
@@ -44,17 +45,18 @@ class BaseModel(pl.LightningModule):
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)
         self.lr = self.args.get('lr', LR)
+        #self.char_to_idx = list(essentials['char_to_idx'])
 
         loss = self.args.get('loss', LOSS)
         if loss not in ("ctc", "transformer"):
             self.loss_fn = getattr(torch.nn.functional, loss)
-
+        
         self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
         self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
-
-        self.train_acc = Accuracy()
-        self.val_acc = Accuracy()
-        self.test_acc = Accuracy()
+        self.num_classes = len(self.char_to_idx)
+        self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
+        self.test_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
     
     def configure_optimizers(self):
         """

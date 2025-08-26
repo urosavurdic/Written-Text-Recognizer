@@ -41,6 +41,7 @@ class BaseDataModule(pl.LightningDataModule):
         self.data_train: Union[BaseDataset, ConcatDataset]
         self.data_val: Union[BaseDataset, ConcatDataset]
         self.data_test: Union[BaseDataset, ConcatDataset]
+        self.num_classes: int
 
     @classmethod
     def data_directory_path(cls):
