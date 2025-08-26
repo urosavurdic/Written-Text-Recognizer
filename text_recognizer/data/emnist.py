@@ -60,7 +60,7 @@ class EMNIST(BaseDataModule):
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
-    
+        self.num_classes = len(self.char_to_idx)
     @staticmethod
     def add_data_specific_args(parser):
         """
