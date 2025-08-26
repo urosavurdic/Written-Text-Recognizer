@@ -74,7 +74,8 @@ class BaseDataModule(pl.LightningDataModule):
             'num_workers': self.num_workers,
             'input_dim': self.dim,
             'output_dim': self.output_dim,
-            'char_to_idx': self.char_to_idx
+            'char_to_idx': self.char_to_idx,
+            'num_classes': self.num_classes
         }
     
     def prepare_data(self):

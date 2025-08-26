@@ -37,7 +37,7 @@ class BaseModel(pl.LightningModule):
     This class is designed to be extended by specific model implementations, such as MLP or CNN, which will define their own architectures and training logic.
     """
 
-    def __init__(self, model, args: argparse.Namespace = None):
+    def __init__(self, model, args: argparse.Namespace = None, num_classes: int = None):
         super().__init__()
         self.model = model
         self.args = vars(args) if args is not None else {}
@@ -53,7 +53,12 @@ class BaseModel(pl.LightningModule):
         
         self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
         self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
-        self.num_classes = len(self.char_to_idx)
+        #self.num_classes = len(self.char_to_idx)
+
+        if num_classes is None:
+            raise ValueError("num_classes must be provided to BaseModel")
+        self.num_classes = num_classes
+
         self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.test_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
