@@ -38,7 +38,7 @@ class CNN(nn.Module):
         super().__init__()
         self.args = vars(args) if args is not None else {}
         input_dim = data_config["input_dim"]
-        num_classes = len(data_config["char_to_indx"])
+        num_classes = len(data_config["mapping"])
 
         conv_dim = self.args.get("conv_dim", CONV_DIM)
         fc_dim = self.args.get("fc_dim", FC_DIM)
