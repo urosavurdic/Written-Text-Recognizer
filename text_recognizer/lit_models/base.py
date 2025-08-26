@@ -14,6 +14,9 @@ ONE_CYCLE_TOTAL_STEPS = 100
 class Accuracy(TorchAccuracy):
     """Accuracy Metric with a hack."""
 
+    def __init__(self):
+        super().__init__(task="multiclass")
+
     def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
         """
         Hack for PyTorch Lightning 1.2+ softmax issue.
