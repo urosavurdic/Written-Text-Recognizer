@@ -51,7 +51,7 @@ class EMNIST(BaseDataModule):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f) # Load the essentials from the JSON file
 
-        self.char_to_idx = essentials['char_to_idx'] # Convert the character to index mapping to a list
+        self.char_to_idx = list(essentials['char_to_idx'])# Convert the character to index mapping to a list
         self.inverse_char_to_idx = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
         self.transform = transforms.Compose([
             transforms.ToTensor(),
@@ -60,7 +60,6 @@ class EMNIST(BaseDataModule):
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
-        self.num_classes = 62 + NUM_SPECIAL_TOKENS
     
     @staticmethod
     def add_data_specific_args(parser):
@@ -101,6 +100,14 @@ class EMNIST(BaseDataModule):
         basic = f"EMNIST(num_classes={len(self.char_to_idx)}, dim={self.dim}, output_dim={self.output_dim})"
         if self.train_dataset is None and self.val_dataset is None and self.test_dataset is None:
             return basic
+        
+        x, y = next(iter(self.train_dataloader()))
+        data = (
+            f"Train/val/test sizes: {len(self.data_train)}, {len(self.data_val)}, {len(self.data_test)}\n"
+            f"Batch x stats: {(x.shape, x.dtype, x.min(), x.mean(), x.std(), x.max())}\n"
+            f"Batch y stats: {(y.shape, y.dtype, y.min(), y.max())}\n"
+        )
+        return basic + data
     
 
     

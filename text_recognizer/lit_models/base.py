@@ -1,11 +1,26 @@
 import argparse
 import torch
 import pytorch_lightning as pl
-from torchmetrics import Accuracy
 
 OPTIMIZER = 'Adam'
 LR = 1e-3
 LOSS = 'CrossEntropyLoss'
+ONE_CYCLE_TOTAL_STEPS = 100
+
+class Accuracy(pl.metrics.Accuracy):
+    """Accuracy Metric with a hack."""
+
+    def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
+        """
+        Metrics in Pytorch-lightning 1.2+ versions expect preds to be between 0 and 1 else fails with the ValueError:
+        "The `preds` should be probabilities, but values were detected outside of [0,1] range."
+        This is being tracked as a bug in https://github.com/PyTorchLightning/metrics/issues/60.
+        This method just hacks around it by normalizing preds before passing it in.
+        Normalized preds are not necessary for accuracy computation as we just care about argmax().
+        """
+        if preds.min() < 0 or preds.max() > 1:
+            preds = torch.nn.functional.softmax(preds, dim=-1)
+        super().update(preds=preds, target=target)
 
 class BaseModel(pl.LightningModule):
     """
@@ -23,20 +38,21 @@ class BaseModel(pl.LightningModule):
         super().__init__()
         self.model = model
         self.args = vars(args) if args is not None else {}
-        ##### FLAG: Never takes real num_classes
-        num_classes = self.args.get('num_classes', 66)  # Default to 10 classes if not specified 
 
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)
         self.lr = self.args.get('lr', LR)
 
         loss = self.args.get('loss', LOSS)
-        if not loss == "transformer":
-            self.loss_fn = getattr(torch.nn, loss)()
+        if loss not in ("ctc", "transformer"):
+            self.loss_fn = getattr(torch.nn.functional, loss)
 
-        self.train_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.val_acc = Accuracy(task="multiclass", num_classes=num_classes)
-        self.test_acc = Accuracy(task="multiclass", num_classes=num_classes)
+        self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
+        self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
+
+        self.train_acc = Accuracy()
+        self.val_acc = Accuracy()
+        self.test_acc = Accuracy()
     
     def configure_optimizers(self):
         """
@@ -44,7 +60,12 @@ class BaseModel(pl.LightningModule):
         Returns:
             torch.optim.Optimizer: The configured optimizer instance.
         """
-        return self.optimizer(self.parameters(), lr=self.lr)
+        optimizer = self.optimizer(self.parameters(), lr=self.lr)
+        if self.one_cycle_max_lr is None:
+            return optimizer
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer=optimizer, max_lr=self.one_cycle_max_lr, total_steps=self.one_cycle_total_steps)
+        return {"optimizer": optimizer, "lr_scheduler": scheduler, "monitor": "val_loss"}
+    
     def forward(self, x):
         """
         Forward pass of the model. This method should be overridden by subclasses to define the model's architecture.
@@ -107,7 +128,9 @@ class BaseModel(pl.LightningModule):
         Returns:
             argparse.ArgumentParser: The updated argument parser with model-specific arguments.
         """
-        parser.add_argument('--optimizer', type=str, default=OPTIMIZER, help='Optimizer type from torch.optim') 
-        parser.add_argument('--lr', type=float, default=LR)
-        parser.add_argument('--loss', type=str, default=LOSS, help='Loss function from torch.nn')
+        parser.add_argument("--optimizer", type=str, default=OPTIMIZER, help="optimizer class from torch.optim")
+        parser.add_argument("--lr", type=float, default=LR)
+        parser.add_argument("--one_cycle_max_lr", type=float, default=None)
+        parser.add_argument("--one_cycle_total_steps", type=int, default=ONE_CYCLE_TOTAL_STEPS)
+        parser.add_argument("--loss", type=str, default=LOSS, help="loss function from torch.nn.functional")
         return parser
