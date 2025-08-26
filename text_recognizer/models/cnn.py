@@ -38,7 +38,7 @@ class CNN(nn.Module):
         super().__init__()
         self.args = vars(args) if args is not None else {}
         input_dim = data_config["input_dim"]
-        num_classes = data_config["output_dim"]
+        output_dim = data_config["output_dim"]
 
         conv_dim = self.args.get("conv_dim", CONV_DIM)
         fc_dim = self.args.get("fc_dim", FC_DIM)
@@ -57,7 +57,7 @@ class CNN(nn.Module):
         conv_output_size = IMG_SIZE // 2
         fc_input_dim = int(conv_output_size * conv_output_size * conv_dim)
         self.fc1 = nn.Linear(fc_input_dim, fc_dim)
-        self.fc2 = nn.Linear(fc_dim, num_classes)
+        self.fc2 = nn.Linear(fc_dim, output_dim )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
