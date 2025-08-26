@@ -8,7 +8,7 @@ from torchmetrics import Accuracy as TorchAccuracy
 
 OPTIMIZER = 'Adam'
 LR = 1e-3
-LOSS = 'CrossEntropyLoss'
+LOSS = 'cross_entropy'
 ONE_CYCLE_TOTAL_STEPS = 100
 
 class Accuracy(TorchAccuracy):
