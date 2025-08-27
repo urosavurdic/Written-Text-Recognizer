@@ -14,7 +14,7 @@ from text_recognizer.data.emnist import EMNIST
 
 from text_recognizer.data.sentence_generator import SentenceGen
 
-DATA_DIRNAME = BaseDataModule.data_dirname() / "processed" / "emnist_lines"
+DATA_DIRNAME = BaseDataModule.data_directory_path() / "processed" / "emnist_lines"
 ESSENTIALS_FILENAME = Path(__file__).parents[0].resolve() / "emnist_lines_essentials.json"
 
 MAX_LENGTH = 32
