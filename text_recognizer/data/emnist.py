@@ -60,7 +60,7 @@ class EMNIST(BaseDataModule):
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
-        self.num_classes = len(self.char_to_idx)
+        self.num_classes = len(self.char_to_idx) + 4
     @staticmethod
     def add_data_specific_args(parser):
         """
@@ -182,9 +182,11 @@ def _process_raw_data(filename: str, data_dirname: Path):
     print("Saving essentials...")
     mapping = data['dataset']['mapping'][0, 0]
     char_to_idx = {int(m[0]): chr(m[1]) for m in mapping}
+    num_classes = len(char_to_idx) + 4
 
     essentials = {
-        'char_to_idx': char_to_idx,          
+        'char_to_idx': char_to_idx,
+        'num_classes': num_classes,        
         'input_dim': list(x_train.shape[1:])
     }
     with open(ESSENTIALS_FILENAME, 'w') as f:
