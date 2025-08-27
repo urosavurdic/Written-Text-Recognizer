@@ -6,7 +6,7 @@ import nltk
 import numpy as np
 from text_recognizer.data.base_data_module import BaseDataModule
 
-NLTK_DATA_DIRNAME = BaseDataModule.data_dirname() / "downloaded" / "nltk"
+NLTK_DATA_DIRNAME = BaseDataModule.data_directory_path() / "downloaded" / "nltk"
 
 class SentenceGen:
     """
