@@ -14,6 +14,7 @@ class ConvBlock(nn.Module):
     def __init__(self, input_channels: int, output_channels: int) -> None:
         super().__init__()
         self.conv = nn.Conv2d(input_channels, output_channels, kernel_size=3, stride=1, padding=1)
+        self.bn = nn.BatchNorm2d(output_channels) # to stabilize training and improves generalization and ensure good gradient flow
         self.relu = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -26,7 +27,8 @@ class ConvBlock(nn.Module):
         """
 
         c = self.conv(x)
-        r = self.relu(c)
+        b = self.bn(c)
+        r = self.relu(b)
 
         return r
     
@@ -48,19 +50,23 @@ class CNN(nn.Module):
         fc_dim = self.args.get("fc_dim", FC_DIM)
 
         self.conv1 = ConvBlock(input_dim[0], conv_dim)
-        self.conv2 = ConvBlock(conv_dim, conv_dim)
-        self.dropout = nn.Dropout(0.25)
+        self.conv2 = ConvBlock(conv_dim, 2*conv_dim)
+        self.conv3 = ConvBlock(2*conv_dim, 2*conv_dim)
+        self.conv4 = ConvBlock(2*conv_dim, conv_dim)
+        self.dropout = nn.Dropout(0.4)
         self.max_pool = nn.MaxPool2d(2)
+        self.gap = nn.AdaptiveAvgPool2d(1) # to reduce overfitting and make network more efficient reduces HxW to 1x1
 
         """
         3x3 convs have padding size 1 => leaves input size unchanged
         2x2 max pooling => divides input size by 2
         flattening => squares it
         """
-
+        """
         conv_output_size = IMG_SIZE // 2
         fc_input_dim = int(conv_output_size * conv_output_size * conv_dim)
-        self.fc1 = nn.Linear(fc_input_dim, fc_dim)
+        """
+        self.fc1 = nn.Linear(conv_dim, fc_dim)
         self.fc2 = nn.Linear(fc_dim, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -73,10 +79,17 @@ class CNN(nn.Module):
         _B, _C, H, W = x.shape
         assert H == W == IMG_SIZE
 
+        # feature extractor
         x = self.conv1(x)
         x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.conv4(x)
+
         x = self.max_pool(x)
-        x = torch.flatten(x, 1)
+        x = self.gap(x) # [B, C, 1, 1]
+        x = torch.flatten(x, 1) # [B, C]
+
+        # classifier head
         x = self.fc1(x)
         x = F.relu(x)
         x = self.dropout(x)
