@@ -108,8 +108,8 @@ def main():
     )
 
     # running LR finder
-    tuner = Tuner(trainer)
-    lr_finder = tuner.lr_find(lit_model, datamodule=data)
+    #tuner = Tuner(trainer)
+    #lr_finder = tuner.lr_find(lit_model, datamodule=data)
 
     # Pick the suggested learning rate
 
