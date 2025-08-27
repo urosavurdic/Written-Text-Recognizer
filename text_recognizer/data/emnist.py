@@ -179,8 +179,8 @@ def _process_raw_data(filename: str, data_dirname: Path):
 
     print("Saving essentials...")
     # Save the character to index mapping and input dimensions in a JSON file.
-
-    mapping = {int(k): chr(v) for k, v in data["dataset"]["mapping"][0, 0]} # mapping contains [label_index, ASCII_code]
+    print("Extracting character mapping...")
+    mapping = data["dataset"]["mapping"][0, 0] # mapping contains [label_index, ASCII_code]
     mapping = np.array(mapping)
     char_to_idx = {int(row[0]): chr(row[1]) for row in mapping}
     characters = _augment_emnist_characters(list(char_to_idx.values()))
