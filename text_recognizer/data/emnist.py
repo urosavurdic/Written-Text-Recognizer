@@ -60,7 +60,7 @@ class EMNIST(BaseDataModule):
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
-        self.num_classes = len(self.char_to_idx) + 4
+        self.num_classes = len(self.char_to_idx)
     @staticmethod
     def add_data_specific_args(parser):
         """
@@ -180,7 +180,9 @@ def _process_raw_data(filename: str, data_dirname: Path):
     print("Saving essentials...")
     # Save the character to index mapping and input dimensions in a JSON file.
 
-    char_to_idx = {int(k): chr(v) for k, v in data["dataset"]["char_to_idx"][0, 0]}
+    mapping = {int(k): chr(v) for k, v in data["dataset"]["mapping"][0, 0]} # mapping contains [label_index, ASCII_code]
+    mapping = np.array(mapping)
+    char_to_idx = {int(row[0]): chr(row[1]) for row in mapping}
     characters = _augment_emnist_characters(list(char_to_idx.values()))
     num_classes = len(char_to_idx)
 
