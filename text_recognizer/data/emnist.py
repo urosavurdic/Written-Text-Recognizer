@@ -182,10 +182,10 @@ def _process_raw_data(filename: str, data_dirname: Path):
 
     char_to_idx = {int(k): chr(v) for k, v in data["dataset"]["char_to_idx"][0, 0]}
     characters = _augment_emnist_characters(list(char_to_idx.values()))
-    essentials = {"characters": characters, "input_dim": list(x_train.shape[1:])}
     num_classes = len(char_to_idx)
 
     essentials = {
+        'characters': characters,
         'char_to_idx': char_to_idx,
         'num_classes': num_classes,        
         'input_dim': list(x_train.shape[1:])
