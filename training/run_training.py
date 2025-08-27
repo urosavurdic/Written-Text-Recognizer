@@ -38,16 +38,24 @@ def _setup_parser():
         argparse.ArgumentParser: Configured argument parser.
     """
     parser = argparse.ArgumentParser(add_help=False)
-
+    
     # Add basic trainer arguments manually
+    trainer_parser = pl.Trainer.add_argparse_args(parser)
+    trainer_parser._action_groups[1].title = "Trainer Args" 
+    parser = argparse.ArgumentParser(add_help=False, parents=[trainer_parser])
+
+
+    """
     parser.add_argument('--max_epochs', type=int, default=10)
     parser.add_argument('--accelerator', type=str, default="cpu")   # use "gpu" if available
     parser.add_argument('--devices', type=int, default=1)
     parser.add_argument('--precision', type=int, default=32)
-
+    """
+    
     # basic arguments
-    parser.add_argument('--data_class', type=str, default='MNIST')
-    parser.add_argument('--model_class', type=str, default='MLP')
+    parser.add_argument('--data_class', type=str, default='EMNIST')
+    parser.add_argument('--model_class', type=str, default='CNN')
+    parser.add_argument("--load_checkpoint", type=str, default=None)
 
     # model specific arguments
     temp_arg = parser.parse_known_args()[0]
@@ -78,11 +86,11 @@ def main():
     model_class = _import_class(f'text_recognizer.models.{args.model_class}')
     
     data = data_class(args)
-    data.setup("fit") 
-    print("Num classes:", data.num_classes)
-    print("Max label in dataset:", max([int(y) for y in data.targets]))
+    #data.setup("fit") 
+    #print("Num classes:", data.num_classes)
+    #print("Max label in dataset:", max([int(y) for y in data.targets]))
     model = model_class(data_config=data.configuration(), args=args)
-
+    
     lit_model = lit_models.BaseModel(model, args=args, num_classes=data.num_classes)
 
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
@@ -100,19 +108,20 @@ def main():
     )
 
     # running LR finder
-    tuner = Tuner(trainer)
-    lr_finder = tuner.lr_find(lit_model, datamodule=data)
+    #tuner = Tuner(trainer)
+    #lr_finder = tuner.lr_find(lit_model, datamodule=data)
 
     # Pick the suggested learning rate
-    new_lr = lr_finder.suggestion()
-    print(f"Suggested learning rate: {new_lr}")
+
+    #new_lr = lr_finder.suggestion()
+    #print(f"Suggested learning rate: {new_lr}")
 
     # Update model hparams with suggested LR
-    lit_model.hparams.lr = new_lr
+    #lit_model.hparams.lr = new_lr
 
     # Plot the LR finder results
-    fig = lr_finder.plot(suggest=True)
-    plt.show()
+    #fig = lr_finder.plot(suggest=True)
+    #plt.show()
 
     # Train with new LR
     trainer.fit(lit_model, datamodule=data)
