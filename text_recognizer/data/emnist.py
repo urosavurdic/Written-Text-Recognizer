@@ -51,7 +51,7 @@ class EMNIST(BaseDataModule):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f) # Load the essentials from the JSON file
 
-        self.char_to_idx = list(essentials['char_to_idx'])# Convert the character to index mapping to a list
+        self.char_to_idx = list(essentials['characters'])# Convert the character to index mapping to a list
         self.inverse_char_to_idx = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
         self.transform = transforms.Compose([
             transforms.ToTensor(),
@@ -179,10 +179,11 @@ def _process_raw_data(filename: str, data_dirname: Path):
 
     print("Saving essentials...")
     # Save the character to index mapping and input dimensions in a JSON file.
-    print("Saving essentials...")
-    mapping = data['dataset']['mapping'][0, 0]
-    char_to_idx = {int(m[0]): chr(m[1]) for m in mapping}
-    num_classes = len(char_to_idx) + 4
+
+    char_to_idx = {int(k): chr(v) for k, v in data["dataset"]["char_to_idx"][0, 0]}
+    characters = _augment_emnist_characters(list(char_to_idx.values()))
+    essentials = {"characters": characters, "input_dim": list(x_train.shape[1:])}
+    num_classes = len(char_to_idx)
 
     essentials = {
         'char_to_idx': char_to_idx,
