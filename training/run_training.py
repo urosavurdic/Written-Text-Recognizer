@@ -40,17 +40,16 @@ def _setup_parser():
     parser = argparse.ArgumentParser(add_help=False)
     
     # Add basic trainer arguments manually
+    """
     trainer_parser = pl.Trainer.add_argparse_args(parser)
     trainer_parser._action_groups[1].title = "Trainer Args" 
     parser = argparse.ArgumentParser(add_help=False, parents=[trainer_parser])
-
-
     """
+    
     parser.add_argument('--max_epochs', type=int, default=10)
     parser.add_argument('--accelerator', type=str, default="cpu")   # use "gpu" if available
     parser.add_argument('--devices', type=int, default=1)
     parser.add_argument('--precision', type=int, default=32)
-    """
     
     # basic arguments
     parser.add_argument('--data_class', type=str, default='EMNIST')
