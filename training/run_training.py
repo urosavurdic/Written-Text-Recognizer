@@ -79,7 +79,7 @@ def main():
     
     data = data_class(args)
     print("Num classes:", data.num_classes)
-    print("Max label in dataset:", max([int(y) for _, y in data.data_test]))
+    print("Max label in dataset:", max([int(y) for _, y in data.data_train]))
     model = model_class(data_config=data.configuration(), args=args)
 
     lit_model = lit_models.BaseModel(model, args=args, num_classes=data.num_classes)
