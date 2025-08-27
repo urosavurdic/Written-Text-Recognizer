@@ -95,6 +95,9 @@ class EMNIST(BaseDataModule):
                 self.x_test = f['x_test'][:]
                 self.y_test = f['y_test'][:].squeeze().astype(int)
             self.data_test = BaseDataset(self.x_test, self.y_test, transform=self.transform)
+        
+        self.targets = self.data_train.dataset.target
+
     
     def __repr__(self):
         basic = f"EMNIST(num_classes={len(self.char_to_idx)}, dim={self.dim}, output_dim={self.output_dim})"

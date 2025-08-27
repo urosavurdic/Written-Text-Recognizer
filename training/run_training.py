@@ -78,6 +78,7 @@ def main():
     model_class = _import_class(f'text_recognizer.models.{args.model_class}')
     
     data = data_class(args)
+    data.setup("fit") 
     print("Num classes:", data.num_classes)
     print("Max label in dataset:", max([int(y) for y in data.targets]))
     model = model_class(data_config=data.configuration(), args=args)
