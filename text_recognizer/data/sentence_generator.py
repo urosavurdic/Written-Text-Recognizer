@@ -5,6 +5,7 @@ import re
 import nltk
 import numpy as np
 from text_recognizer.data.base_data_module import BaseDataModule
+from nltk.corpus import brown
 
 NLTK_DATA_DIRNAME = BaseDataModule.data_directory_path() / "downloaded" / "nltk"
 
@@ -27,12 +28,12 @@ class SentenceGen:
         if max_length is None:
             max_length = self.max_length
         if max_length is None:
-            raise ValueError("Must provise max_length to this method or when making an object.")
+            raise ValueError("Must provide max_length to this method or when making an object.")
         
         for _ in range(10): #has max 10 tries to return right value
             try:
                 # pick a random word start index
-                first_indx = np.random.randint(0, len(self.word_start_indsword) - 1) 
+                first_indx = np.random.randint(0, len(self.word_start_inds) - 1)
                 start_indx = self.word_start_inds[first_indx]
 
                 # find possible end possitions
@@ -44,7 +45,7 @@ class SentenceGen:
 
                 # Randomly choose one of these end indx
                 end_ind = np.random.choice(end_ind_candidates)
-                # slice text srom start index to end index
+                # slice text from start index to end index
                 sampled_text = self.text[start_indx:end_ind].strip()
                 # substring is generated sentence
                 return sampled_text
