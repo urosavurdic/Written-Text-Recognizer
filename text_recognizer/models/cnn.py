@@ -61,7 +61,7 @@ class CNN(nn.Module):
         conv_output_size = IMG_SIZE // 2
         fc_input_dim = int(conv_output_size * conv_output_size * conv_dim)
         self.fc1 = nn.Linear(fc_input_dim, fc_dim)
-        self.fc2 = nn.Linear(fc_dim, num_classes )
+        self.fc2 = nn.Linear(fc_dim, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
