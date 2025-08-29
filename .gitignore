@@ -18,7 +18,3 @@ logs/
 checkpoints/
 *.ckpt
 *.pth
-
-
-# permanently stopping emnist_essentials from uploading because of test check
-*.json
