@@ -52,11 +52,8 @@ class EMNIST(BaseDataModule):
             essentials = json.load(f) # Load the essentials from the JSON file
 
         self.char_to_idx = list(essentials['characters'])# Convert the character to index mapping to a list
-        self.inverse_char_to_idx = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
-        self.transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))
-        ]) # Normalize the images to have mean 0.1307 and std 0.3081
+        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
+        self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]) # Normalize the images to have mean 0.1307 and std 0.3081
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
@@ -95,13 +92,11 @@ class EMNIST(BaseDataModule):
                 self.x_test = f['x_test'][:]
                 self.y_test = f['y_test'][:].squeeze().astype(int)
             self.data_test = BaseDataset(self.x_test, self.y_test, transform=self.transform)
-        
-        self.targets = self.data_train.dataset.target
 
     
     def __repr__(self):
-        basic = f"EMNIST(num_classes={len(self.char_to_idx)}, dim={self.dim}, output_dim={self.output_dim})"
-        if self.train_dataset is None and self.val_dataset is None and self.test_dataset is None:
+        basic = f"EMNIST(num_classes={len(self.char_to_idx)}, mapping={len(self.char_to_idx)}, input_dim={self.dim})"
+        if self.data_train is None and self.data_val is None and self.data_test is None:
             return basic
         
         x, y = next(iter(self.train_dataloader()))
@@ -120,6 +115,7 @@ def _download_and_process_emnist():
     """
     Downloads and processes the EMNIST dataset, saving it in a processed format.
     """
+    # creates parents folder if it doesn't exist
     if not RAW_DATA_DIRNAME.exists():
         RAW_DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
         print(f"Created raw data directory at {RAW_DATA_DIRNAME}")
@@ -186,20 +182,15 @@ def _process_raw_data(filename: str, data_dirname: Path):
     characters = _augment_emnist_characters(list(char_to_idx.values()))
     num_classes = len(char_to_idx)
 
-    essentials = {
-        'characters': characters,
-        'char_to_idx': char_to_idx,
-        'num_classes': num_classes,        
-        'input_dim': list(x_train.shape[1:])
-    }
+    essentials = {'characters': characters, 'input_dim': list(x_train.shape[1:])}
     with open(ESSENTIALS_FILENAME, 'w') as f:
         json.dump(essentials, f)   
         
-        print("Cleaning up...")
-        # Clean up the downloaded files
-        shutil.rmtree("matlab")
-        os.chdir(curdir)
-        print("EMNIST dataset processed and saved successfully.")
+    print("Cleaning up...")
+    # Clean up the downloaded files
+    shutil.rmtree("matlab")
+    os.chdir(curdir)
+    print("EMNIST dataset processed and saved successfully.")
 
 def _sample_to_balance(x, y):
     """

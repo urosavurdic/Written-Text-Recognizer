@@ -89,22 +89,30 @@ def main():
     #print("Num classes:", data.num_classes)
     #print("Max label in dataset:", max([int(y) for y in data.targets]))
     model = model_class(data_config=data.configuration(), args=args)
-    
-    lit_model = lit_models.BaseModel(model, args=args, num_classes=data.num_classes)
+    # choosing right model
+    if args.loss not in ("ctc", "transformer"):
+        lit_model_class = lit_models.BaseModel(model, args=args, num_classes=data.num_classes)
+    if args.loss == "ctc":
+        lit_model_class = lit_models.CTCLitModel
+    if args.loss == "transformer":
+        lit_model_class = lit_models.TransformerLitModel
+    # load from checkpoint
+    if args.load_checkpoint is not None:
+        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model)
+    else:
+        lit_model = lit_model_class(args=args, model=model)
 
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
 
-    callbacks = [pl.callbacks.EarlyStopping(monitor='val_loss', mode='min', patience=10)]
+    early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
+    model_checkpoint_callback = pl.callbacks.ModelCheckpoint(
+        filename="{epoch:03d}-{val_loss:.3f}-{val_cer:.3f}", monitor="val_loss", mode="min"
+    )
+    callbacks = [early_stopping_callback, model_checkpoint_callback]
 
     args.weight_summary = 'full' # print full model summary
-    trainer = pl.Trainer(
-        max_epochs=args.max_epochs,
-        accelerator=args.accelerator,
-        devices=args.devices,
-        precision=args.precision,
-        logger=logger,
-        callbacks=callbacks
-    )
+    
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
 
     # running LR finder
     #tuner = Tuner(trainer)
@@ -123,6 +131,9 @@ def main():
     #plt.show()
 
     # Train with new LR
+
+    trainer.tune(lit_model, datamodule=data)
+
     trainer.fit(lit_model, datamodule=data)
     trainer.test(lit_model, datamodule=data)
 
