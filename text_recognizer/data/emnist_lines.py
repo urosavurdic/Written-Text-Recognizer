@@ -26,7 +26,7 @@ NUM_TEST = 2000
 
 class EMNISTLines(BaseDataModule):
 
-    def __init__(self, args = None):
+    def __init__(self, args: argparse.Namespace = None):
         super().__init__(args)
 
         self.max_length = self.args.get("max_length", MAX_LENGTH)
@@ -40,102 +40,102 @@ class EMNISTLines(BaseDataModule):
         self.emnist = EMNIST()
         self.char_to_idx = self.emnist.char_to_idx
         self.dim = (
-            self.emnist.dim[0],
-            self.emnist.dim[1],
-            self.emnist.dim[2] * self.max_length
+            self.emnist.dim[0], # num of channels
+            self.emnist.dim[1], # Height
+            self.emnist.dim[2] * self.max_length # Width * max_length
         )
         self.output_dim = (self.max_length, 1)
         self.transform = transforms.Compose([transforms.ToTensor()])
 
-        @staticmethod
-        def add_arguments(parser):
-            BaseDataModule.add_arguments(parser)
-            parser.add_argument("--max_length", type=int, default=MAX_LENGTH, help="Max line length in characters.")
-            parser.add_argument("--min_overlap", type=float, default=MIN_OVERLAP, help="Min overlap between characters in a line, between 0 and 1.")
-            parser.add_argument("--max_overlap", type=float, default=MAX_OVERLAP, help="Max overlap between characters in a line, between 0 and 1.")
-            parser.add_argument("--with_start_end_tokens", action="store_true", default=False)
-            return parser
+    @staticmethod
+    def add_arguments(parser):
+        BaseDataModule.add_arguments(parser)
+        parser.add_argument("--max_length", type=int, default=MAX_LENGTH, help="Max line length in characters.")
+        parser.add_argument("--min_overlap", type=float, default=MIN_OVERLAP, help="Min overlap between characters in a line, between 0 and 1.")
+        parser.add_argument("--max_overlap", type=float, default=MAX_OVERLAP, help="Max overlap between characters in a line, between 0 and 1.")
+        parser.add_argument("--with_start_end_tokens", action="store_true", default=False)
+        return parser
         
-        @property
-        def data_filename():
-            return (DATA_DIRNAME / f"ml_{self.max_length}_o{self.min_overlap:f}_{self.max_overlap:f}_ntr{self.num_train}_ntv{self.num_val}_nte{self.num_test}_{self.with_start_end_tokens}.h5")
+    @property
+    def data_filename(self):
+        return (DATA_DIRNAME / f"ml_{self.max_length}_o{self.min_overlap:f}_{self.max_overlap:f}_ntr{self.num_train}_ntv{self.num_val}_nte{self.num_test}_{self.with_start_end_tokens}.h5")
 
-        def prepare_data(self, *args, **kwargs) -> None:
-            if self.data_filename.exists():
-                return
-            np.random.seed(42)
-            self._generate_data("train")
-            self._generate_data("val")
-            self._generate_data("test")
-        
-        def setup(self, stage: str) -> None:
-            print("EMNISTLines dataset loading data from HDF5...")
-            if stage == "fit" or stage is None:
-                with h5py.File(self.data_filename, "r") as f:
-                    x_train = f["x_train"][:]
-                    y_train = f["y_train"][:].astype(int)
-                    x_val = f["x_val"][:]
-                    y_val = f["y_val"][:].astype(int)
-                
-                self.data_train = BaseDataset(x_train, y_train, transform=self.transform)
-                self.data_val = BaseDataset(x_val, y_val, transform=self.transform)
-
-            if stage == "train" or stage is None:
-                with h5py.File(self.data_filename, "r") as f:
-                    x_test = f["x_test"][:]
-                    y_test = f["y_test"][:].astype(int)
+    def prepare_data(self, *args, **kwargs) -> None:
+        if self.data_filename.exists():
+            return
+        np.random.seed(42)
+        self._generate_data("train")
+        self._generate_data("val")
+        self._generate_data("test")
+    
+    def setup(self, stage: str) -> None:
+        print("EMNISTLines dataset loading data from HDF5...")
+        if stage == "fit" or stage is None:
+            with h5py.File(self.data_filename, "r") as f:
+                x_train = f["x_train"][:]
+                y_train = f["y_train"][:].astype(int)
+                x_val = f["x_val"][:]
+                y_val = f["y_val"][:].astype(int)
             
-                self.data_test = BaseDataset(x_test, y_test, transform=self.transform)
-                
-        def __repr__(self) -> str:
-            """
-            Print information about dataset.
-            """
-            basic = (
-            "EMNIST Lines Dataset\n"
-            f"Min overlap: {self.min_overlap}\n"
-            f"Max overlap: {self.max_overlap}\n"
-            f"Num classes: {len(self.mapping)}\n"
-            f"Dims: {self.dims}\n"
-            f"Output dims: {self.output_dims}\n"
-            )
-            if self.data_train is None and self.data_val is None and self.data_test is None:
-                return basic
+            self.data_train = BaseDataset(x_train, y_train, transform=self.transform)
+            self.data_val = BaseDataset(x_val, y_val, transform=self.transform)
 
-            x, y = next(iter(self.train_dataloader()))
-            data = (
-                f"Train/val/test sizes: {len(self.data_train)}, {len(self.data_val)}, {len(self.data_test)}\n"
-                f"Batch x stats: {(x.shape, x.dtype, x.min(), x.mean(), x.std(), x.max())}\n"
-                f"Batch y stats: {(y.shape, y.dtype, y.min(), y.max())}\n"
-            )
-            return basic + data
+        if stage == "train" or stage is None:
+            with h5py.File(self.data_filename, "r") as f:
+                x_test = f["x_test"][:]
+                y_test = f["y_test"][:].astype(int)
         
-        def _generate_data(self, split: str) -> None:
-            print(f"EMNISTLinesDataset generating data for {split}...")
-
-            sentence_generator = SentenceGen(self.max_length - 2) # Substract two for start and end token
-            emnist = self.emnist
-            emnist.prepare_data()
-            emnist.setup()
-
-            if split == "train":
-                samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_inx)
-                num = self.num_train
-
-            elif split == "val":
-                samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_inx)
-                num = self.num_val
-
-            else:
-                samples_by_char = get_samples_by_char(emnist.x_test, emnist.y_test, emnist.char_to_inx)
-                num = self.num_test
+            self.data_test = BaseDataset(x_test, y_test, transform=self.transform)
             
-            DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
-            with h5py.File(self.data_filename, "a") as f:
-                x, y = create_dataset_of_images(num, samples_by_char, sentence_generator, self.min_overlap, self.max_overlap)
-                y = convert_strings_to_lables(y, emnist.nverse_char_to_idx, length = self.output_dims[0], with_start_end_tokens=self.with_start_end_tokens)
-                f.create_dataset(f"x_{split}", data=x, dtype="u1", compression="lzf")
-                f.create_dataset(f"y_{split}", data=y, dtype="u1", compression="lzf")
+    def __repr__(self) -> str:
+        """
+        Print information about dataset.
+        """
+        basic = (
+        "EMNIST Lines Dataset\n"
+        f"Min overlap: {self.min_overlap}\n"
+        f"Max overlap: {self.max_overlap}\n"
+        f"Num classes: {len(self.char_to_idx)}\n"
+        f"Dims: {self.dim}\n"
+        f"Output dims: {self.output_dim}\n"
+        )
+        if self.data_train is None and self.data_val is None and self.data_test is None:
+            return basic
+
+        x, y = next(iter(self.train_dataloader()))
+        data = (
+            f"Train/val/test sizes: {len(self.data_train)}, {len(self.data_val)}, {len(self.data_test)}\n"
+            f"Batch x stats: {(x.shape, x.dtype, x.min(), x.mean(), x.std(), x.max())}\n"
+            f"Batch y stats: {(y.shape, y.dtype, y.min(), y.max())}\n"
+        )
+        return basic + data
+        
+    def _generate_data(self, split: str) -> None:
+        print(f"EMNISTLinesDataset generating data for {split}...")
+
+        sentence_generator = SentenceGen(self.max_length - 2) # Substract two for start and end token
+        emnist = self.emnist
+        emnist.prepare_data()
+        emnist.setup()
+
+        if split == "train":
+            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_idx)
+            num = self.num_train
+
+        elif split == "val":
+            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_idx)
+            num = self.num_val
+
+        else:
+            samples_by_char = get_samples_by_char(emnist.x_test, emnist.y_test, emnist.char_to_idx)
+            num = self.num_test
+        
+        DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
+        with h5py.File(self.data_filename, "a") as f:
+            x, y = create_dataset_of_images(num, samples_by_char, sentence_generator, self.min_overlap, self.max_overlap, self.dim)
+            y = convert_strings_to_labels(y, emnist.idx_to_char, length = self.output_dims[0], with_start_end_tokens=self.with_start_end_tokens)
+            f.create_dataset(f"x_{split}", data=x, dtype="u1", compression="lzf")
+            f.create_dataset(f"y_{split}", data=y, dtype="u1", compression="lzf")
 
     
 def get_samples_by_char(samples, labels, char_to_indx):
@@ -150,7 +150,7 @@ def get_samples_by_char(samples, labels, char_to_indx):
     return samples_by_char
 
 def select_letter_samples_for_string(string, samples_by_char):
-    zero_image = torch.zeros((28,28), dtype=torch.unit8)
+    zero_image = torch.zeros((28,28), dtype=torch.uint8)
     sample_image_by_char = {}
     for char in string:
         if char in sample_image_by_char:
@@ -183,10 +183,11 @@ def create_dataset_of_images(num, samples_by_char, sentence_generator, min_overl
         label = sentence_generator.generate()
         images[n] = construct_image_from_string(label, samples_by_char, min_overlap, max_overlap, dims[-1])
         labels.append(label)
+    return images, labels
 
-def convert_strings_to_lables(strings: Sequence[str], mapping: Dict[str,int], length: int, with_start_end_token:bool):
+def convert_strings_to_labels(strings: Sequence[str], mapping: Dict[str,int], length: int, with_start_end_token:bool):
 
-    labels = np.ones((len(strings), length), dtype=np.unit8)*mapping["<P>"]
+    labels = np.ones((len(strings), length), dtype=np.uint8)*mapping["<P>"]
     for i, string in enumerate(strings):
         tokens = list(string)
         if with_start_end_token:

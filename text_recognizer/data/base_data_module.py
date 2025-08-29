@@ -50,12 +50,6 @@ class BaseDataModule(pl.LightningDataModule):
         """
         return Path(__file__).resolve().parents[1] / 'data' / 'datasets'
     
-    def data_dirname(cls):
-        """
-        Returns the path to the directory where the dataset is stored.
-        """
-        return Path(__file__).resolve().parents[1] / 'data' / 'datasets'
-    
     @staticmethod
     def add_arguments(parser: argparse.ArgumentParser):
         """
@@ -130,7 +124,7 @@ def load_and_print_info(data_module: type) -> None:
     dataset = data_module(args)
     dataset.prepare_data()
     dataset.setup()
-    print(f"Dataset: {dataset.__class__.__name__}")
+    print(dataset)
 
 
 def _download_raw_data(metadata: Dict, dl_dirname: Path) -> Path:
