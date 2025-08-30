@@ -36,7 +36,7 @@ class ConvBlock:
 
         return r
 
-class LineCNN:
+class LineCNN(nn.Module):
 
     def __init__(self, data_config: Dict[Any, Any], args: argparse.Namespace = None) -> None:
         super().__init__()
