@@ -91,16 +91,16 @@ def main():
     model = model_class(data_config=data.configuration(), args=args)
     # choosing right model
     if args.loss not in ("ctc", "transformer"):
-        lit_model_class = lit_models.BaseModel
+        lit_model_class = lit_models.BaseModel(num_classes=data.num_classes)
     if args.loss == "ctc":
         lit_model_class = lit_models.CTCLitModel
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerLitModel
     # load from checkpoint
     if args.load_checkpoint is not None:
-        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model)
+        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model, num_classes=data.num_classes)
     else:
-        lit_model = lit_model_class(args=args, model=model)
+        lit_model = lit_model_class(args=args, model=model, num_classes=data.num_classes)
 
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
 
