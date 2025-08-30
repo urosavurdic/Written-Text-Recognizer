@@ -96,12 +96,13 @@ def main():
         lit_model_class = lit_models.CTCLitModel
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerLitModel
+
     # load from checkpoint
     if args.load_checkpoint is not None:
         lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model, num_classes=data.num_classes)
     else:
-        lit_model = lit_model_class(args=args, model=model, num_classes=data.num_classes)
-
+        lit_model = lit_model_class(model=model, args=args, num_classes=data.num_classes)
+        
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
 
     early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
