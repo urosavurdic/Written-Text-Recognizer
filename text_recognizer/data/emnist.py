@@ -55,7 +55,7 @@ class EMNIST(BaseDataModule):
         self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
         self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]) # Normalize the images to have mean 0.1307 and std 0.3081
 
-        self.dim = (1, *essentials['dim']) # extra dimension are added by the transforms
+        self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms
         self.output_dim = (1,) # EMNIST has a single output dimension (the character)
         self.num_classes = len(self.char_to_idx)
     @staticmethod
