@@ -9,7 +9,7 @@ LSTM_DIM = 512
 LSTM_LAYERS = 1
 LSTM_DROPOUT = 0.2
 
-class LineCNNLSTM(nn.module):
+class LineCNNLSTM(nn.Module):
     """
     1st: proces using CNN
     2nd: resulting line process in LSTM
