@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.tuner import Tuner
-from pytorch_lightning.tuner.lr_finder import lr_find
 import wandb
 
 
@@ -142,9 +141,7 @@ def main():
 
     # Train with new LR
 
-    lr_finder = lr_find(trainer, lit_model, datamodule=data)
-    new_lr = lr_finder.suggestion()
-    lit_model.hparams.lr = new_lr
+    
 
     trainer.fit(lit_model, datamodule=data)
     trainer.test(lit_model, datamodule=data)
