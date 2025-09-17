@@ -91,7 +91,7 @@ def main():
     model = model_class(data_config=data.configuration(), args=args)
     # choosing right model
     if args.loss not in ("ctc", "transformer"):
-        lit_model_class = lit_models.BaseModel(num_classes=data.num_classes)
+        lit_model_class = lit_models.BaseModel
     if args.loss == "ctc":
         lit_model_class = lit_models.CTCLitModel
     if args.loss == "transformer":
