@@ -113,7 +113,14 @@ def main():
 
     args.weight_summary = 'full' # print full model summary
     
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
+    trainer_args = {k: v for k, v in vars(args).items() if k in pl.Trainer.__init__.__code__.co_varnames}
+    
+    trainer = pl.Trainer(
+    **trainer_args,
+    callbacks=callbacks,
+    logger=logger,
+    default_root_dir="training/logs"
+    )
 
     # running LR finder
     #tuner = Tuner(trainer)
