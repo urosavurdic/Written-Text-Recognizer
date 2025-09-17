@@ -13,7 +13,9 @@ import matplotlib.pyplot as plt
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.tuner import Tuner
+from pytorch_lightning.tuner.lr_finder import lr_find
 import wandb
+
 
 from text_recognizer import lit_models
 
@@ -114,7 +116,7 @@ def main():
     args.weight_summary = 'full' # print full model summary
     
     trainer_args = {k: v for k, v in vars(args).items() if k in pl.Trainer.__init__.__code__.co_varnames}
-    
+
     trainer = pl.Trainer(
     **trainer_args,
     callbacks=callbacks,
@@ -140,7 +142,9 @@ def main():
 
     # Train with new LR
 
-    trainer.tune(lit_model, datamodule=data)
+    lr_finder = lr_find(trainer, lit_model, datamodule=data)
+    new_lr = lr_finder.suggestion()
+    lit_model.hparams.lr = new_lr
 
     trainer.fit(lit_model, datamodule=data)
     trainer.test(lit_model, datamodule=data)
