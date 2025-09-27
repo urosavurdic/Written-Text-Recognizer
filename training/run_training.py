@@ -98,7 +98,7 @@ def main():
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerLitModel
     
-    num_classes = getattr(data, "num_classes", None)
+    # num_classes = getattr(data, "num_classes", None) only for EMNIST MNIST and IAM
 
     # load from checkpoint
     if args.load_checkpoint is not None:
