@@ -64,7 +64,7 @@ def _setup_parser():
 
     # get data, model and LitModel specific arguments
     data_group = parser.add_argument_group('Data Arguments')
-    data_class.add_data_specific_args(data_group)
+    data_class.add_arguments(data_group)
 
     model_group = parser.add_argument_group('Model Arguments')
     model_class.add_to_argparse(model_group)
