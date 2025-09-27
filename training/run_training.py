@@ -97,6 +97,8 @@ def main():
         lit_model_class = lit_models.CTCLitModel
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerLitModel
+    
+    num_classes = getattr(data, "num_classes", None)
 
     # load from checkpoint
     if args.load_checkpoint is not None:
