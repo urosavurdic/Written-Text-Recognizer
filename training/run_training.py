@@ -102,9 +102,9 @@ def main():
 
     # load from checkpoint
     if args.load_checkpoint is not None:
-        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model) #, num_classes=data.num_classes
+        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model, num_classes=data.num_classes)
     else:
-        lit_model = lit_model_class(model=model, args=args) , #num_classes=data.num_classes
+        lit_model = lit_model_class(model=model, args=args, num_classes=data.num_classes)
         
     logger = [pl.loggers.TensorBoardLogger("training/logs")]
 
