@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 import torch
 import pytorch_lightning as pl
-from pytorch_lightning.tuner import Tuner
+#from pytorch_lightning.tuner import Tuner
 import wandb
 
 
