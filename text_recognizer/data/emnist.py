@@ -180,7 +180,7 @@ def _process_raw_data(filename: str, data_dirname: Path):
     mapping = np.array(mapping)
     char_to_idx = {int(row[0]): chr(row[1]) for row in mapping}
     characters = _augment_emnist_characters(list(char_to_idx.values()))
-    num_classes = len(char_to_idx)
+
 
     essentials = {'characters': characters, 'input_dim': list(x_train.shape[1:])}
     with open(ESSENTIALS_FILENAME, 'w') as f:
