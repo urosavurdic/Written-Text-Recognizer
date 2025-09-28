@@ -60,7 +60,7 @@ def _setup_parser():
     parser.add_argument("--load_checkpoint", type=str, default=None)
 
     # model specific arguments
-    temp_arg = parser.parse_known_args()
+    temp_arg, _ = parser.parse_known_args()
     model_class = _import_class(f'text_recognizer.models.{temp_arg.model_class}')
     data_class = _import_class(f'text_recognizer.data.{temp_arg.data_class}')
 
@@ -125,7 +125,7 @@ def main():
     callbacks = [early_stopping_callback, model_checkpoint_callback]
 
     args.weight_summary = 'full' # print full model summary
-    trainer = pl.Trainer(args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
+    trainer = pl.Trainer(**vars(args), callbacks=callbacks, logger=logger, weights_save_path="training/logs")
     
     trainer.tune(lit_model, datamodule=data)  # If passing --auto_lr_find, this will set learning rate
 
