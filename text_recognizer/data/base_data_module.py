@@ -41,7 +41,6 @@ class BaseDataModule(pl.LightningDataModule):
         self.data_train: Union[BaseDataset, ConcatDataset]
         self.data_val: Union[BaseDataset, ConcatDataset]
         self.data_test: Union[BaseDataset, ConcatDataset]
-        self.num_classes: int
 
     @classmethod
     def data_directory_path(cls):
@@ -70,12 +69,9 @@ class BaseDataModule(pl.LightningDataModule):
         """
         
         return {
-            'batch_size': self.batch_size,
-            'num_workers': self.num_workers,
             'input_dim': self.dim,
             'output_dim': self.output_dim,
             'char_to_idx': self.char_to_idx,
-            'num_classes': self.num_classes
         }
     
     def prepare_data(self):

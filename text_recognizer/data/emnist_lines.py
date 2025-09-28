@@ -36,7 +36,6 @@ class EMNISTLines(BaseDataModule):
         self.num_val = self.args.get("num_val", NUM_VAL)
         self.num_test = self.args.get("num_test", NUM_TEST)
         self.with_start_end_tokens = self.args.get("with_start_end_tokens", False)
-        self.num_classes = None  # for compatibility with some models
 
         self.emnist = EMNIST()
         self.char_to_idx = self.emnist.char_to_idx

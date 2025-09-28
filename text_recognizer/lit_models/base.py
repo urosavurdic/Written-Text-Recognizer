@@ -53,7 +53,7 @@ class BaseModel(pl.LightningModule):
         
         self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
         self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
-        #self.num_classes = len(self.char_to_idx)
+        self.num_classes = len(self.char_to_idx)
 
         if num_classes is None:
             raise ValueError("num_classes must be provided to BaseModel")
