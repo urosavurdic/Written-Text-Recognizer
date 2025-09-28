@@ -125,7 +125,7 @@ def main():
     callbacks = [early_stopping_callback, model_checkpoint_callback]
 
     args.weight_summary = 'full' # print full model summary
-    trainer = pl.Trainer.from_argparse_args(args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
+    trainer = pl.Trainer(args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
     
     trainer.tune(lit_model, datamodule=data)  # If passing --auto_lr_find, this will set learning rate
 
