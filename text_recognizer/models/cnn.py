@@ -41,7 +41,7 @@ class CNN(nn.Module):
         self.args = vars(args) if args is not None else {}
         input_dim = data_config["input_dim"]
         output_dim = data_config["output_dim"]
-        num_classes = len(data_config["chr)_to_idx"])
+        num_classes = len(data_config["char_to_idx"])
 
         if isinstance(output_dim, tuple):
             output_dim = output_dim[0]
