@@ -45,7 +45,7 @@ class LineCNN(nn.Module):
         self.num_classes = len(data_config["char_to_idx"])
         self.output_length = data_config["output_dim"][0]
 
-        _C, H, _W = data_config["input_dims"]
+        _C, H, _W = data_config["input_dim"]
         conv_dim = self.args.get("conv_dim", CONV_DIM)
         fc_dim = self.args.get("fc_dim", FC_DIM)
         self.WW = self.args.get("window_width", WINDOW_WIDTH)
