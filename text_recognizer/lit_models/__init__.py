@@ -1,4 +1,4 @@
-from .base import BaseModel, Accuracy
+from .base import BaseModel
 from .ctc import CTCModel
 from .metrics import CharacterErrorRate
 from .transformer import TransformerModel
