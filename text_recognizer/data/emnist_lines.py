@@ -81,7 +81,7 @@ class EMNISTLines(BaseDataModule):
             self.data_train = BaseDataset(x_train, y_train, transform=self.transform)
             self.data_val = BaseDataset(x_val, y_val, transform=self.transform)
 
-        if stage == "train" or stage is None:
+        if stage == "test" or stage is None:
             with h5py.File(self.data_filename, "r") as f:
                 x_test = f["x_test"][:]
                 y_test = f["y_test"][:].astype(int)
