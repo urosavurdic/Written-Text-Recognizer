@@ -186,12 +186,12 @@ def create_dataset_of_images(num, samples_by_char, sentence_generator, min_overl
         labels.append(label)
     return images, labels
 
-def convert_strings_to_labels(strings: Sequence[str], mapping: Dict[str,int], length: int, with_start_end_token:bool):
+def convert_strings_to_labels(strings: Sequence[str], mapping: Dict[str,int], length: int, with_start_end_tokens:bool = False) -> np.ndarray:
 
     labels = np.ones((len(strings), length), dtype=np.uint8)*mapping["<P>"]
     for i, string in enumerate(strings):
         tokens = list(string)
-        if with_start_end_token:
+        if with_start_end_tokens:
             tokens = ["<S>", *tokens, "<E>"]
         for ii, token in enumerate(tokens):
             labels[i, ii] = mapping[token]
