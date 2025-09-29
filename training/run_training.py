@@ -55,6 +55,7 @@ def _setup_parser():
     #parser.add_argument("--wandb", action="store_true", default=False)
 
     # basic arguments
+    parser.add_argument("--wandb", action="store_true", default=False)
     parser.add_argument('--data_class', type=str, default='EMNIST')
     parser.add_argument('--model_class', type=str, default='CNN')
     parser.add_argument("--load_checkpoint", type=str, default=None)
@@ -126,6 +127,7 @@ def main():
 
     args.weight_summary = 'full' # print full model summary
     trainer_kwargs = {
+        "wandb": args.wandb,
         "max_epochs": args.max_epochs,
         "accelerator": args.accelerator,
         "devices": args.devices,
