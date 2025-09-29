@@ -4,13 +4,18 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from lightning.pytorch.callbacks import Callback
-from torchmetrics.functional import accuracy
+#from torchmetrics.functional import accuracy
 
 
 OPTIMIZER = 'Adam'
 LR = 1e-3
 LOSS = 'cross_entropy'
 ONE_CYCLE_TOTAL_STEPS = 100
+
+def accuracy(logits, y):
+    preds = torch.argmax(logits, dim=1)
+    return (preds == y).float().mean()
+
 
 
 class BaseModel(pl.LightningModule, Callback):
