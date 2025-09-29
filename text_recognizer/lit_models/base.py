@@ -3,7 +3,8 @@ import torch
 import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
-from torchmetrics import Accuracy
+from lightning.pytorch.callbacks import Callback
+from torchmetrics.functional import accuracy
 
 
 OPTIMIZER = 'Adam'
@@ -11,21 +12,8 @@ LR = 1e-3
 LOSS = 'cross_entropy'
 ONE_CYCLE_TOTAL_STEPS = 100
 
-"""
-class Accuracy(TorchAccuracy):
-    #Accuracy Metric with a hack.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(task="multiclass", *args, **kwargs)
-
-    def update(self, preds: torch.Tensor, target: torch.Tensor) -> None:
-        #Hack for PyTorch Lightning 1.2+ softmax issue.
-        if preds.min() < 0 or preds.max() > 1:
-            preds = F.softmax(preds, dim=-1)
-        super().update(preds=preds, target=target)
-
-"""
-class BaseModel(pl.LightningModule):
+class BaseModel(pl.LightningModule, Callback):
     """
     Base class for all models in the text recognizer project. It provides a common interface for model initialization:
     - `model`: The neural network model to be trained.
@@ -37,7 +25,7 @@ class BaseModel(pl.LightningModule):
     This class is designed to be extended by specific model implementations, such as MLP or CNN, which will define their own architectures and training logic.
     """
 
-    def __init__(self, model, args: argparse.Namespace = None, num_classes: int = None):
+    def __init__(self, model, args: argparse.Namespace = None):
         super().__init__()
         self.model = model
         self.args = vars(args) if args is not None else {}
@@ -45,7 +33,6 @@ class BaseModel(pl.LightningModule):
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)
         self.lr = self.args.get('lr', LR)
-        #self.char_to_idx = list(essentials['char_to_idx'])
 
         loss = self.args.get('loss', LOSS)
         if loss not in ("ctc", "transformer"):
@@ -53,16 +40,26 @@ class BaseModel(pl.LightningModule):
         
         self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
         self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
-        self.num_classes = len(self.char_to_idx)
 
+        self.processed_train_samples = 0
+        self.processed_val_samples = 0
+        self.processed_test_samples = 0
+        
+        self.train_acc = 0
+        self.val_acc = 0
+        self.test_acc = 0
+        
+        #self.num_classes = len(self.char_to_idx)
+        """
         if num_classes is None:
             raise ValueError("num_classes must be provided to BaseModel")
         self.num_classes = num_classes
+        
 
         self.train_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.val_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
         self.test_acc = Accuracy(task="multiclass", num_classes=self.num_classes)
-    
+        """
     def configure_optimizers(self):
         """
         Configures the optimizer for the model based on the specified optimizer type and learning rate.
@@ -95,10 +92,15 @@ class BaseModel(pl.LightningModule):
             torch.Tensor: Loss value for the current training step.
         """
         x, y = batch
+        size = x.size(0)
         logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log('train_loss', loss)
-        self.train_acc(logits, y)
+
+        batch_acc = accuracy(logits, y)
+        self.train_acc = ((self.processed_train_samples * self.train_acc + size * batch_acc) / (self.processed_train_samples + size))
+        self.processed_train_samples += size
+
         self.log('train_acc', self.train_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return loss
     
@@ -113,7 +115,12 @@ class BaseModel(pl.LightningModule):
         logits = self(x)
         loss = self.loss_fn(logits, y)
         self.log('val_loss', loss)
-        self.val_acc(logits, y)
+        
+        size = x.size(0)
+        batch_acc = accuracy(logits, y)
+        self.val_acc = ((self.processed_val_samples * self.val_acc + size * batch_acc) / (self.processed_val_samples + size))
+        self.processed_val_samples += size
+
         self.log('val_acc', self.val_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
     
     def test_step(self, batch, batch_idx):
@@ -125,8 +132,26 @@ class BaseModel(pl.LightningModule):
         """
         x, y = batch
         logits = self(x)
-        self.test_acc(logits, y)
+        size = x.size(0)
+        batch_acc = accuracy(logits, y)
+        self.test_acc = ((self.processed_test_samples * self.test_acc + size * batch_acc) / (self.processed_test_samples + size))
+
         self.log('test_acc', self.test_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+    # https://lightning.ai/docs/pytorch/stable/extensions/callbacks.html
+    
+    def on_train_epoch_start(self) -> None:
+        self.train_acc = 0
+        self.processed_train_samples = 0
+
+    def on_validation_epoch_start(self) -> None:
+        self.val_acc = 0
+        self.processed_val_samples = 0
+
+    def on_test_epoch_start(self) -> None:
+        self.test_acc = 0
+        self.processed_test_samples = 0
+
     
     @staticmethod
     def add_to_argparse(parser):
