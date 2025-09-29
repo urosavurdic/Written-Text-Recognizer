@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 import torch
 import torch.nn.functional as F
 from lightning.pytorch.callbacks import Callback
-#from torchmetrics.functional import accuracy
+import torchmetrics.functional as tmf
 
 
 OPTIMIZER = 'Adam'
@@ -102,7 +102,7 @@ class BaseModel(pl.LightningModule, Callback):
         loss = self.loss_fn(logits, y)
         self.log('train_loss', loss)
 
-        batch_acc = accuracy(logits, y)
+        batch_acc = tmf.accuracy(logits, y)
         self.train_acc = ((self.processed_train_samples * self.train_acc + size * batch_acc) / (self.processed_train_samples + size))
         self.processed_train_samples += size
 
@@ -122,7 +122,7 @@ class BaseModel(pl.LightningModule, Callback):
         self.log('val_loss', loss)
         
         size = x.size(0)
-        batch_acc = accuracy(logits, y)
+        batch_acc = tmf.accuracy(logits, y)
         self.val_acc = ((self.processed_val_samples * self.val_acc + size * batch_acc) / (self.processed_val_samples + size))
         self.processed_val_samples += size
 
@@ -138,7 +138,7 @@ class BaseModel(pl.LightningModule, Callback):
         x, y = batch
         logits = self(x)
         size = x.size(0)
-        batch_acc = accuracy(logits, y)
+        batch_acc = tmf.accuracy(logits, y)
         self.test_acc = ((self.processed_test_samples * self.test_acc + size * batch_acc) / (self.processed_test_samples + size))
 
         self.log('test_acc', self.test_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
