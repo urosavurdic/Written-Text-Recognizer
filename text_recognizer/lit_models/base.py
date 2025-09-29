@@ -104,7 +104,7 @@ class BaseModel(pl.LightningModule):
         self.train_accs.append(batch_acc)
 
         self.log('train_loss', loss)
-        self.log('train_acc', batch_acc, on_step=True, on_epoch=False)
+        
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -122,7 +122,7 @@ class BaseModel(pl.LightningModule):
         self.val_accs.append(acc)
         
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('val_acc_step', acc, on_step=False, on_epoch=False)    
+   
     
     def test_step(self, batch, batch_idx):
         """
@@ -137,8 +137,6 @@ class BaseModel(pl.LightningModule):
         acc = my_accuracy(logits, y)
 
         self.test_accs.append(acc)
-
-        self.log('test_acc', acc, on_step=False, on_epoch=True)
 
     # https://lightning.ai/docs/pytorch/stable/extensions/callbacks.html
     
