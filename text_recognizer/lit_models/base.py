@@ -13,12 +13,15 @@ LOSS = 'cross_entropy'
 ONE_CYCLE_TOTAL_STEPS = 100
 
 def my_accuracy(logits, y):
+    """
+    Newer versions of accuracy require num_classes. As previous trial to implement num_classes faced many issues, I implement simple accuracy calculation here.
+    """
     preds = torch.argmax(logits, dim=1)
     return (preds == y).float().mean()
 
 
 
-class BaseModel(pl.LightningModule, Callback):
+class BaseModel(pl.LightningModule):
     """
     Base class for all models in the text recognizer project. It provides a common interface for model initialization:
     - `model`: The neural network model to be trained.
@@ -46,13 +49,9 @@ class BaseModel(pl.LightningModule, Callback):
         self.one_cycle_max_lr = self.args.get("one_cycle_max_lr", None)
         self.one_cycle_total_steps = self.args.get("one_cycle_total_steps", ONE_CYCLE_TOTAL_STEPS)
 
-        self.processed_train_samples = 0
-        self.processed_val_samples = 0
-        self.processed_test_samples = 0
-        
-        self.train_acc = 0
-        self.val_acc = 0
-        self.test_acc = 0
+        self.train_accs = []
+        self.val_accs = []
+        self.test_accs = []
         
         #self.num_classes = len(self.char_to_idx)
         """
@@ -97,16 +96,15 @@ class BaseModel(pl.LightningModule, Callback):
             torch.Tensor: Loss value for the current training step.
         """
         x, y = batch
-        size = x.size(0)
+
         logits = self(x)
         loss = self.loss_fn(logits, y)
-        self.log('train_loss', loss)
 
         batch_acc = my_accuracy(logits, y)
-        self.train_acc = ((self.processed_train_samples * self.train_acc + size * batch_acc) / (self.processed_train_samples + size))
-        self.processed_train_samples += size
+        self.train_accs.append(batch_acc)
 
-        self.log('train_acc', self.train_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('train_loss', loss)
+        self.log('train_acc', batch_acc, on_step=True, on_epoch=False)
         return loss
     
     def validation_step(self, batch, batch_idx):
@@ -118,15 +116,13 @@ class BaseModel(pl.LightningModule, Callback):
         """
         x, y = batch
         logits = self(x)
-        loss = self.loss_fn(logits, y)
-        self.log('val_loss', loss)
-        
-        size = x.size(0)
-        batch_acc = my_accuracy(logits, y)
-        self.val_acc = ((self.processed_val_samples * self.val_acc + size * batch_acc) / (self.processed_val_samples + size))
-        self.processed_val_samples += size
 
-        self.log('val_acc', self.val_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        loss = self.loss_fn(logits, y)
+        acc = my_accuracy(logits, y)
+        self.val_accs.append(acc)
+        
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val_acc_step', acc, on_step=False, on_epoch=False)    
     
     def test_step(self, batch, batch_idx):
         """
@@ -137,25 +133,47 @@ class BaseModel(pl.LightningModule, Callback):
         """
         x, y = batch
         logits = self(x)
-        size = x.size(0)
-        batch_acc = my_accuracy(logits, y)
-        self.test_acc = ((self.processed_test_samples * self.test_acc + size * batch_acc) / (self.processed_test_samples + size))
+        
+        acc = my_accuracy(logits, y)
 
-        self.log('test_acc', self.test_acc, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.test_accs.append(acc)
+
+        self.log('test_acc', acc, on_step=False, on_epoch=True)
 
     # https://lightning.ai/docs/pytorch/stable/extensions/callbacks.html
     
-    def on_train_epoch_start(self) -> None:
-        self.train_acc = 0
-        self.processed_train_samples = 0
-
-    def on_validation_epoch_start(self) -> None:
-        self.val_acc = 0
-        self.processed_val_samples = 0
-
-    def on_test_epoch_start(self) -> None:
-        self.test_acc = 0
-        self.processed_test_samples = 0
+    def on_train_epoch_end(self):
+        if self.train_accs:
+            epoch_acc = torch.stack(self.train_accs).mean()
+            self.log('train_acc', epoch_acc, prog_bar=True, logger=True)
+            # Clear the list after logging to prevent accumulation
+            self.train_accs = []
+    
+    def on_validation_epoch_end(self):
+        if self.val_accs:
+            epoch_acc = torch.stack(self.val_accs).mean()
+            self.log('val_acc', epoch_acc, prog_bar=True, logger=True)
+            # Clear the list after logging
+            self.val_accs = []
+    
+    def on_test_epoch_end(self):
+        if self.test_accs:
+            epoch_acc = torch.stack(self.test_accs).mean()
+            self.log('test_acc', epoch_acc, prog_bar=True, logger=True)
+            # Clear the list after logging
+            self.test_accs = []
+    
+    def on_train_epoch_start(self):
+        # Reset list at the start of each epoch as backup
+        self.train_accs = []
+    
+    def on_validation_epoch_start(self):
+        # Reset list at the start of each epoch as backup
+        self.val_accs = []
+    
+    def on_test_epoch_start(self):
+        # Reset list at the start of each epoch as backup
+        self.test_accs = []
 
     
     @staticmethod
