@@ -76,8 +76,6 @@ class CTCModel(BaseModel):
         decoded = self.greedy_decode(logprobs, max_length=y.shape[1])
         self.val_cer(decoded, y)
         self.log("val_cer", self.val_cer, on_step=False, on_epoch=True)
-        self.val_cer(decoded, y)
-        self.log("val_cer", self.val_cer, on_step=False, on_epoch=True, prog_bar=True)
         
     
     def test_step(self, batch, batch_idx):
