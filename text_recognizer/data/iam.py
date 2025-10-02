@@ -8,7 +8,7 @@ import zipfile
 from boltons.cacheutils import cachedproperty
 import toml
 
-from text_recognizer.data.base_data_module import BaseDataModule, _download_raw_dataset, load_and_print_info
+from text_recognizer.data.base_data_module import BaseDataModule, _download_raw_data, load_and_print_info
 
 
 RAW_DATA_DIRNAME = BaseDataModule.data_directory_path() / "raw" / "iam"
@@ -41,7 +41,7 @@ class IAM(BaseDataModule):
     def prepare_data(self, *args, **kwargs) -> None:
         if self.xml_filenames:
             return
-        filename = _download_raw_dataset(self.metadata, DL_DATA_DIRNAME)
+        filename = _download_raw_data(self.metadata, DL_DATA_DIRNAME)
         _extract_raw_dataset(filename, DL_DATA_DIRNAME)
 
     @property

@@ -4,8 +4,35 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 
+class PositionalEncodingImage(nn.Module):
+    """
+    2D version of Attention-is-all-you-need positional encoding.
+    Image is treated as a sequence of pixels, each pixel having a positional encoding that combines its row and column information.
+    """
+    def __init__(self, d_model: int, max_h: int = 2000, max_w: int = 2000) -> None:
+        super().__init__()
+        self.d_model = d_model
+        assert d_model % 2 == 0, f"Embedding depth {d_model} is not even"
+        pe = self.make_pe(d_model=d_model, max_h=max_h, max_w=max_w)  # (d_model, max_h, max_w)
+        self.register_buffer("pe", pe)
+
+    @staticmethod
+    def make_pe(d_model: int, max_h: int, max_w: int) -> torch.Tensor:
+        pe_h = PositionalEncoding.make_pe(d_model=d_model // 2, max_len=max_h)  # (max_h, 1, d_model//2)
+        pe_h = pe_h.permute(2, 0, 1).expand(-1, -1, max_w)  # (d_model//2, max_h, max_w)
+
+        pe_w = PositionalEncoding.make_pe(d_model=d_model // 2, max_len=max_w)  # (max_w, 1, d_model//2)
+        pe_w = pe_w.permute(2, 1, 0).expand(-1, max_h, -1)  # (d_model//2, max_h, max_w)
+
+        pe = torch.cat([pe_h, pe_w], dim=0) # (d_model, max_h, max_w)
 
 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        assert x.shape[1] == self.pe.shape[0]
+        x = x + self.pe[:, : x.size(2), : x.size(3)]
+
+        return x
+    
 
 class PositionalEncoding(torch.nn.Module):
     """

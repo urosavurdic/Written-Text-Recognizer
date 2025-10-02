@@ -33,6 +33,7 @@ class LineCNNLSTM(nn.Module):
             dropout=lstm_dropout,
             bidirectional=True,
         )
+        self.fc = nn.Linear(lstm_dim, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.line_cnn(x) # (B, C, S)
