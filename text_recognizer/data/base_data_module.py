@@ -24,7 +24,7 @@ class BaseDataModule(pl.LightningDataModule):
         num_workers (int): Number of workers for data loading.
         dim (Tuple[int, int]): Dimensions of the input data (height, width).
         output_dim (int): Dimension of the output data, typically the number of classes.
-        char_to_idx (Dict[str, int]): Mapping from characters to indices for text recognition tasks.
+        char_to_idx (Dict[str, int]): Mapping from characters to their corresponding indices.
     """
     def __init__(self, args: argparse.Namespace = None):
         super().__init__()

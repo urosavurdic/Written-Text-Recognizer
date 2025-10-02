@@ -128,7 +128,6 @@ class EMNISTLines2(BaseDataModule):
         print(f"EMNISTLines2 generating data for {split}...")
 
         sentence_generator = SentenceGen(self.max_length - 2)  # Subtract two because we will add start/end tokens
-
         emnist = self.emnist
         emnist.prepare_data()
         emnist.setup()
@@ -185,9 +184,11 @@ def construct_image_from_string(string: str, samples_by_char: dict, min_overlap:
     next_overlap_width = W - int(overlap * W)
     concatenated_image = torch.zeros((H, width), dtype=torch.uint8)
     x = IMAGE_X_PADDING
+
     for image in sampled_images:
         concatenated_image[:, x : (x + W)] += image
         x += next_overlap_width
+        
     return torch.minimum(torch.Tensor([255]), concatenated_image)
 
 

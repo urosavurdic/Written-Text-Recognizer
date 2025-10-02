@@ -8,7 +8,7 @@ from PIL import Image, ImageFile, ImageOps
 import numpy as np
 from torchvision import transforms
 
-from text_recognizer.data.util import BaseDataset, convert_strings_to_labels, split_dataset
+from text_recognizer.data.util import BaseDataset, convert_str_to_labels, split_dataset
 from text_recognizer.data.base_data_module import BaseDataModule, load_and_print_info
 from text_recognizer.data.emnist import EMNIST
 from text_recognizer.data.iam import IAM
@@ -80,7 +80,7 @@ class IAMLines(BaseDataModule):
             x_test, labels_test = load_line_crops_and_labels("test", PROCESSED_DATA_DIRNAME)
             assert self.output_dim[0] >= max([len(_) for _ in labels_test]) + 2
 
-            y_test = convert_strings_to_labels(labels_test, self.idx_to_char, length=self.output_dim[0])
+            y_test = convert_str_to_labels(labels_test, self.idx_to_char, length=self.output_dim[0])
             self.data_test = BaseDataset(x_test, y_test, transform=get_transform(IMAGE_WIDTH))
 
         if stage is None:

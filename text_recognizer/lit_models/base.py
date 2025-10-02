@@ -29,7 +29,7 @@ class BaseModel(pl.LightningModule):
     - `optimizer`: The optimizer to be used for training, defaulting to Adam.
     - `lr`: Learning rate for the optimizer, defaulting to 1e-3.
     - `loss_fn`: The loss function to be used, defaulting to cross-entropy loss.
-    - `train_acc`, `val_acc`, `test_acc`: Accuracy metrics for training, validation, and testing phases.
+    - `train_acc`, `val_acc`, `test_acc`: Accuracy metrics for training, validation, and testing phases for each batch.
     This class is designed to be extended by specific model implementations, such as MLP or CNN, which will define their own architectures and training logic.
     """
 
@@ -37,6 +37,10 @@ class BaseModel(pl.LightningModule):
         super().__init__()
         self.model = model
         self.args = vars(args) if args is not None else {}
+        """
+        self.num_classes = len(self.args.get('char_to_idx', data_config['char_to_idx']))
+        """
+
 
         optimizer = self.args.get('optimizer', OPTIMIZER)
         self.optimizer = getattr(torch.optim, optimizer)

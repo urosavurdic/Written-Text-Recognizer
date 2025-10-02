@@ -20,6 +20,10 @@ class PositionalEncoding(torch.nn.Module):
 
     @staticmethod
     def make_pe(d_model: int, max_len: int) -> torch.Tensor:
+        """
+        Generates positional encoding matrix of shape (max_len, 1, d_model)
+        Even indices use sine, odd indices use cosine.
+        """
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
@@ -29,6 +33,13 @@ class PositionalEncoding(torch.nn.Module):
         return pe
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        The function adds positional encoding to the input tensor x.
+        Args:
+            x: Tensor, shape [seq_len, batch_size, embedding_dim]
+        Returns:
+            Tensor: Positional encoded tensor of shape [seq_len, batch_size, embedding_dim]
+        """
         # x.shape = (S, B, d_model)
         assert x.shape[2] == self.pe.shape[2]
         x = x + self.pe[: x.size(0)]
@@ -37,7 +48,8 @@ class PositionalEncoding(torch.nn.Module):
 
 def generate_square_subsequent_mask(size: int) -> torch.Tensor:
     """
-    Generate a triangular (size, size) mask.
+    This mask prevents the model from attending to future positions in the sequence during training, enforcing the autoregressive property.
+    The mask is upper triangular, with zeros on and below the diagonal and negative infinity above, which is used to mask out future tokens during attention calculations.
     """
     mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
     mask = mask.float().masked_fill(mask == 0, float("-inf")).masked_fill(mask == 1, float(0.0))
