@@ -171,6 +171,7 @@ def construct_image_from_string(string: str, samples_by_char: dict, min_overlap:
     next_overlap_width = W - int(overlap*W)
     concatenated_image = torch.zeros((H, width), dtype=torch.uint8)
     x = 0
+
     for image in sampled_images:
         concatenated_image[:, x : (x + W)] += image
         x += next_overlap_width

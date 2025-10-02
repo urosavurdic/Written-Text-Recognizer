@@ -44,7 +44,9 @@ class CharacterErrorRate(torchmetrics.Metric):
         # Returns the average CER across all processed samples
         return self.error / self.total
     
-    
+"""
+Example usage and test case for CharacterErrorRate metric.
+
 def test_character_error_rate():
     metric = CharacterErrorRate([0, 1])
     X = torch.tensor(
@@ -67,3 +69,4 @@ def test_character_error_rate():
 
     if __name__ == "__main__":
         test_character_error_rate()
+"""  

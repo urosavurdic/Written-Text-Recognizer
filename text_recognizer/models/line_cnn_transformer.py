@@ -61,12 +61,17 @@ class LineCNNTransformer(nn.Module):
         """
         Input:
             x (B, H, W) image
+            B - batch size
+            H - image height
+            W - image width
+            E - embedding dimension
+            Sx - input sequence length
 
         Output:
             torch.Tensor (Sx, B, E) logits
         """
         x = self.line_cnn(x)  # (B, E, Sx)
-        x = x * math.sqrt(self.dim)
+        x = x * math.sqrt(self.dim) # Scale by sqrt of embedding dimension
         x = x.permute(2, 0, 1)  # (Sx, B, E)
         x = self.pos_encoder(x)  # (Sx, B, E)
         return x
@@ -75,7 +80,7 @@ class LineCNNTransformer(nn.Module):
         """
         Input:
             x (B, H, W) image
-            y (B, Sy) with elements in [0, C-1] where C is num_classes
+            y (B, Sy) with elements in [0, C-1] where C is num_classes, Sy is output sequence length
         Output:
             torch.Tensor (Sy, B, C) logits
         """

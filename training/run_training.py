@@ -98,9 +98,9 @@ def main():
     if args.loss not in ("ctc", "transformer"):
         lit_model_class = lit_models.BaseModel
     if args.loss == "ctc":
-        lit_model_class = lit_models.CTCLitModel
+        lit_model_class = lit_models.CTCModel
     if args.loss == "transformer":
-        lit_model_class = lit_models.TransformerLitModel
+        lit_model_class = lit_models.TransformerModel
     
     # num_classes = getattr(data, "num_classes", None) only for EMNIST MNIST and IAM
 
