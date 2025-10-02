@@ -55,7 +55,7 @@ def _setup_parser():
     #parser.add_argument("--wandb", action="store_true", default=False)
 
     # basic arguments
-    #parser.add_argument("--wandb", action="store_true", default=False)
+    parser.add_argument("--wandb", action="store_true", default=False)
     parser.add_argument('--data_class', type=str, default='EMNIST')
     parser.add_argument('--model_class', type=str, default='CNN')
     parser.add_argument("--load_checkpoint", type=str, default=None)
@@ -111,12 +111,12 @@ def main():
         lit_model = lit_model_class(model=model, args=args)
         
     logger = pl.loggers.TensorBoardLogger("training/logs")
-    """
+    
     if args.wandb:
         logger = pl.loggers.WandbLogger()
         logger.watch(model)
         logger.log_hyperparams(vars(args))
-    """
+
     
 
     early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
@@ -145,7 +145,7 @@ def main():
     trainer.fit(lit_model, datamodule=data)
     trainer.test(lit_model, datamodule=data)
     
-    """
+    # Save the best model path
     best_model_path = model_checkpoint_callback.best_model_path
     if best_model_path:
         print("Best model saved at:", best_model_path)
@@ -153,7 +153,6 @@ def main():
             wandb.save(best_model_path)
             print("Best model also uploaded to W&B")
 
-    """
     
 if __name__ == '__main__':
     main()
