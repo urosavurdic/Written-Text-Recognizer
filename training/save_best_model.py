@@ -12,6 +12,9 @@ FILE_NAME = Path(__file__).resolve()
 ARTIFACTS_BASE_DIRNAME = FILE_NAME.parents[1] / "text_recognizer" / "artifacts"
 TRAINING_LOGS_DIRNAME = FILE_NAME.parent / "logs"
 
+wandb.login(key="abeeab6d1103e23cf9f6e7453f6afadef15e1dbd")
+
+
 def save_best_model():
     parser = _setup_parser()
     args = parser.parse_args()
