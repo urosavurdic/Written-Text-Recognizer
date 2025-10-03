@@ -92,7 +92,7 @@ class IAMParagraphs(BaseDataModule):
             return BaseDataset(X, Y, transform=transform)
 
         print(f"IAMParagraphs.setup({stage}): Loading IAM paragraph regions and lines...")
-        validate_input_and_output_dimensions(input_dim=self.dim, output_dim=self.output_dim)
+        validate_input_and_output_dimensions(self.dim, self.output_dim)
 
         if stage == "fit" or stage is None:
             data_train_val = _load_dataset(split="train_val", augment=self.augment)
@@ -107,7 +107,7 @@ class IAMParagraphs(BaseDataModule):
             "IAM Paragraphs Dataset\n"
             f"Num classes: {len(self.char_to_idx)}\n"
             f"Input dims : {self.dim}\n"
-            f"Output dims: {self.output_dims}\n"
+            f"Output dims: {self.output_dim}\n"
         )
         if self.data_train is None and self.data_val is None and self.data_test is None:
             return basic
