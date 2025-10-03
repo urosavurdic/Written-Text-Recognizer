@@ -2,7 +2,6 @@ from typing import Any, List, Sequence, Tuple
 import random
 from PIL import Image
 import numpy as np
-from text_recognizer.data.emnist import EMNIST
 
 from text_recognizer.data.iam_paragraphs import (
     IAMParagraphs,
@@ -19,21 +18,14 @@ from text_recognizer.data.util import BaseDataset, convert_str_to_labels
 
 PROCESSED_DATA_DIRNAME = BaseDataModule.data_directory_path() / "processed" / "iam_synthetic_paragraphs"
 
-class IAMSyntheticParagraphs(BaseDataModule):
+class IAMSyntheticParagraphs(IAMParagraphs):
     """
     DataModule for synthetic paragraphs generated from IAM line images.
     Each paragraph is created by randomly combining line images from the IAM Lines dataset.
     This is useful for training and evaluating text recognition models on paragraph-level data and simulating real-world scenarios.
     Used only for training, not for validation or testing.
     """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        emnist_chars = EMNIST().char_to_idx  # This is a list of all chars (including <P>)
-        NEW_LINE_TOKEN = '\n'
-        all_chars = list(emnist_chars) + [NEW_LINE_TOKEN]
-        self.char_to_idx = {char: idx for idx, char in enumerate(all_chars)}
-        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
-
+    
     def prepare_data(self, *args, **kwargs) -> None:
         """
         Prepares the synthetic paragraph dataset by generating paragraphs from IAM line crops such that they can be used to generate synthetic paragraphs dataset in setup().
