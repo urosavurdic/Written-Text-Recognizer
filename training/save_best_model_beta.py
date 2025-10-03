@@ -1,5 +1,7 @@
 """
-same as non beta version, but without test_cer: {summary['test_cer']}, because it was not logged in some of the previous runs
+same as non beta version, but without test_cer: {summary['test_cer']}, 
+because it was not logged in some of the previous runs.
+Now includes wandb login with API key so it won't prompt in terminal.
 """
 import argparse
 import sys
@@ -14,6 +16,9 @@ import wandb
 FILE_NAME = Path(__file__).resolve()
 ARTIFACTS_BASE_DIRNAME = FILE_NAME.parents[1] / "text_recognizer" / "artifacts"
 TRAINING_LOGS_DIRNAME = FILE_NAME.parent / "logs"
+
+wandb.login(key="abeeab6d1103e23cf9f6e7453f6afadef15e1dbd")
+
 
 def save_best_model():
     parser = _setup_parser()
@@ -37,7 +42,7 @@ def save_best_model():
     best_run = sorted_runs[0]
     summary = best_run.summary
     print(f"Best run ({best_run.name}, {best_run.id}) picked from {len(runs)} runs with the following metrics:")
-    print(f" - val_loss: {summary['val_loss']}, val_cer: {summary['val_cer']}")
+    print(f" - val_loss: {summary.get('val_loss', 'N/A')}, val_cer: {summary.get('val_cer', 'N/A')}")
 
     artifacts_dirname = _get_artifacts_dirname(args.trained_data_class)
     with open(artifacts_dirname / "config.json", "w") as file:
