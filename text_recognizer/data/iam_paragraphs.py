@@ -35,7 +35,7 @@ class IAMParagraphs(BaseDataModule):
         assert emnist_chars is not None
         all_chars = list(emnist_chars) + [NEW_LINE_TOKEN]
         self.char_to_idx = {char: idx for idx, char in enumerate(all_chars)}
-        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}{idx: char for char, idx in self.char_to_idx.items()}
+        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
 
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
         self.output_dim = (MAX_LABEL_LENGTH, 1)  # We assert that this is correct in setup()
