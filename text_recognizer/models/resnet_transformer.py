@@ -45,7 +45,7 @@ class ResnetTransformer(nn.Module):
     
 
         self.enc_pos_encoder = PositionalEncodingImage(
-            d_model=self.dim, max_h=self.dim[1], max_w=self.dim[2]
+            d_model=self.dim, max_h=self.input_dim[1], max_w=self.input_dim[2]
         )  # Max (Ho, Wo)
 
         # Decoder part
