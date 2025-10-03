@@ -13,7 +13,7 @@ class PositionalEncodingImage(nn.Module):
         super().__init__()
         self.d_model = d_model
         assert d_model % 2 == 0, f"Embedding depth {d_model} is not even"
-        self.pe = self.make_pe(d_model=d_model, max_h=max_h, max_w=max_w)  # (d_model, max_h, max_w)
+        pe = self.make_pe(d_model=d_model, max_h=max_h, max_w=max_w)  # (d_model, max_h, max_w)
         self.register_buffer("pe", pe)
 
     @staticmethod
@@ -25,7 +25,7 @@ class PositionalEncodingImage(nn.Module):
         pe_w = pe_w.permute(2, 1, 0).expand(-1, max_h, -1)  # (d_model//2, max_h, max_w)
 
         pe = torch.cat([pe_h, pe_w], dim=0) # (d_model, max_h, max_w)
-
+        return pe
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         assert x.shape[1] == self.pe.shape[0]
