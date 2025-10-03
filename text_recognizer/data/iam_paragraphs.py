@@ -32,10 +32,18 @@ class IAMParagraphs(BaseDataModule):
         super().__init__(args)
         self.augment = self.args.get("augment_data", "true").lower() == "true"
 
-        char_to_idx = EMNIST().char_to_idx
-        assert char_to_idx is not None
-        self.char_to_idx = [*char_to_idx, NEW_LINE_TOKEN]
-        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)}
+
+        emnist_map = EMNIST().char_to_idx  # original EMNIST dict {char: idx}
+        assert emnist_map is not None and isinstance(emnist_map, dict)
+
+        # Add newline token
+        self.char_to_idx = {**emnist_map, NEW_LINE_TOKEN: len(emnist_map)}
+
+        # Reverse mapping
+        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
+
+
+
 
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
         self.output_dim = (MAX_LABEL_LENGTH, 1)  # We assert that this is correct in setup()
@@ -88,7 +96,7 @@ class IAMParagraphs(BaseDataModule):
             """
             crops, labels = load_processed_crops_and_labels(split)
             X = [resize_image(crop, IMAGE_SCALE_FACTOR) for crop in crops]
-            Y = convert_str_to_labels(text=labels, char_to_idx=self.idx_to_char, max_length=self.output_dim[0])
+            Y = convert_str_to_labels(text=labels, char_to_idx=self.char_to_idx, max_length=self.output_dim[0])
             transform = get_transform(image_shape=self.dim[1:], augment=augment)  # type: ignore
             return BaseDataset(X, Y, transform=transform)
 
