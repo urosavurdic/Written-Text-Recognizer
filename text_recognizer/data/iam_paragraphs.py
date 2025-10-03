@@ -97,7 +97,7 @@ class IAMParagraphs(BaseDataModule):
 
         if stage == "fit" or stage is None:
             data_train_val = _load_dataset(split="trainval", augment=self.augment)
-            self.data_train, self.data_val = split_dataset(base_dataset=data_train_val, fraction=TRAIN_FRAC, seed=42)
+            self.data_train, self.data_val = split_dataset(base_dataset=data_train_val, split_ratio=TRAIN_FRAC, seed=42)
 
         if stage == "test" or stage is None:
             self.data_test = _load_dataset(split="test", augment=False)
