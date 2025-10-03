@@ -68,12 +68,11 @@ def convert_str_to_labels(text: str, char_to_idx: Dict[str, int], max_length: in
 
 
     """
-    labels = torch.ones((max_length), dtype=torch.long) * char_to_idx['<P>'] # Padding character
+    labels = torch.ones((len(text), max_length), dtype=torch.long) * char_to_idx['<P>']
     for i, string in enumerate(text):
-        tokens = ["<S>"] + list(string) + ["<E>"]  # Add start and end tokens
-        for j, token in enumerate(tokens):
+        tokens = ["<S>"] + list(string) + ["<E>"]
+        for j, token in enumerate(tokens[:max_length]):
             labels[i, j] = char_to_idx[token]
-    
     return labels
 
 def split_dataset(base_dataset: BaseDataset, split_ratio: float = 0.8, seed: int = 42) -> Tuple[BaseDataset, BaseDataset]:
