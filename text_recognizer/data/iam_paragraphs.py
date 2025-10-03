@@ -31,12 +31,11 @@ class IAMParagraphs(BaseDataModule):
     def __init__(self, args: argparse.Namespace = None):
         super().__init__(args)
         self.augment = self.args.get("augment_data", "true").lower() == "true"
-        emnist_map = EMNIST().char_to_idx  # original EMNIST dict {char: idx}
-        assert emnist_map is not None
-        # Add NEW_LINE_TOKEN to the mapping
-        all_chars = list(emnist_map.keys()) + [NEW_LINE_TOKEN]
+        emnist_chars = EMNIST().char_to_idx  # This is actually a list!
+        assert emnist_chars is not None
+        all_chars = list(emnist_chars) + [NEW_LINE_TOKEN]
         self.char_to_idx = {char: idx for idx, char in enumerate(all_chars)}
-        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
+        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}{idx: char for char, idx in self.char_to_idx.items()}
 
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
         self.output_dim = (MAX_LABEL_LENGTH, 1)  # We assert that this is correct in setup()
