@@ -109,8 +109,8 @@ def _setup_parser() -> argparse.ArgumentParser:
     """Set up Python's ArgumentParser with data, model, trainer, and other arguments."""
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--entity", type=str, default="uros")
-    parser.add_argument("--project", type=str, default="written-text-recognizer")
+    parser.add_argument("--entity", type=str, default="urosavurdic-university-of-belgrade")
+    parser.add_argument("--project", type=str, default="lightning_logs")
     parser.add_argument("--trained_data_class", type=str, default="IAMLines")
     parser.add_argument("--metric", type=str, default="val_loss")
     parser.add_argument("--mode", type=str, default="min")
