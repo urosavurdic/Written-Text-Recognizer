@@ -40,6 +40,10 @@ class IAMParagraphs(BaseDataModule):
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
         self.output_dim = (MAX_LABEL_LENGTH, 1)  # We assert that this is correct in setup()
 
+        self.data_train = None
+        self.data_val = None
+        self.data_test = None
+
     @staticmethod
     def add_arguments(parser):
         """
