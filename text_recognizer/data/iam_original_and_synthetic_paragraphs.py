@@ -20,7 +20,7 @@ class IAMOriginalAndSyntheticParagraphs(BaseDataModule):
         self.output_dim = self.iam_paragraphs.output_dim
         self.char_to_idx = self.iam_paragraphs.char_to_idx
 
-        self.idx_to_char = {v: k for k, v in enumerate(self.idx_to_char)}
+        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)}
 
     @staticmethod
     def add_arguments(parser):
