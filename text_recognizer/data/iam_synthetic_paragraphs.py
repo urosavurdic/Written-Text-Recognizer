@@ -38,21 +38,21 @@ class IAMSyntheticParagraphs(IAMParagraphs):
         iam = IAM()
         iam.prepare_data()
         # generate line
-        crops_train_val, labels_train_val = line_crops_and_labels(iam, "train_val")
+        crops_train_val, labels_train_val = line_crops_and_labels(iam, "trainval")
         crops_test, labels_test = line_crops_and_labels(iam, "test")
         # resize line crops
         crops_train_val = [resize_image(crop, IMAGE_SCALE_FACTOR) for crop in crops_train_val] 
         crops_test = [resize_image(crop, IMAGE_SCALE_FACTOR) for crop in crops_test]
 
         print(f"Saving images and labels at {PROCESSED_DATA_DIRNAME}...")
-        save_images_and_labels(crops_train_val, labels_train_val, "train_val", PROCESSED_DATA_DIRNAME)
+        save_images_and_labels(crops_train_val, labels_train_val, "trainval", PROCESSED_DATA_DIRNAME)
         save_images_and_labels(crops_test, labels_test, "test", PROCESSED_DATA_DIRNAME)
 
     def setup(self, stage: str = None) -> None:
         print(f"IAMSyntheticParagraphs.setup({stage}): Loading trainval IAM paragraph regions and lines...")
 
         if stage == "fit" or stage is None:
-            line_crops, line_labels = load_line_crops_and_labels("train_val", PROCESSED_DATA_DIRNAME)
+            line_crops, line_labels = load_line_crops_and_labels("trainval", PROCESSED_DATA_DIRNAME)
             X, para_labels = generate_synthetic_paragraphs(line_crops=line_crops, line_labels=line_labels)
             Y = convert_str_to_labels(text=para_labels, char_to_idx=self.idx_to_char, max_length=self.output_dim[0])
             transform = get_transform(image_shape=self.dim[1:], augment=self.augment)
