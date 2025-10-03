@@ -13,7 +13,7 @@ class PositionalEncodingImage(nn.Module):
         super().__init__()
         self.d_model = d_model
         assert d_model % 2 == 0, f"Embedding depth {d_model} is not even"
-        pe = self.make_pe(d_model=d_model, max_h=max_h, max_w=max_w)  # (d_model, max_h, max_w)
+        self.pe = self.make_pe(d_model=d_model, max_h=max_h, max_w=max_w)  # (d_model, max_h, max_w)
         self.register_buffer("pe", pe)
 
     @staticmethod
