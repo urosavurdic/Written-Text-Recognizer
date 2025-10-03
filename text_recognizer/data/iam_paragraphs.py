@@ -34,13 +34,11 @@ class IAMParagraphs(BaseDataModule):
 
 
         emnist_map = EMNIST().char_to_idx  # original EMNIST dict {char: idx}
-        assert emnist_map is not None and isinstance(emnist_map, dict)
-
-        # Add newline token
-        self.char_to_idx = {**emnist_map, NEW_LINE_TOKEN: len(emnist_map)}
+        assert emnist_map is not None
+        self.char_to_idx = [*emnist_map, NEW_LINE_TOKEN]
 
         # Reverse mapping
-        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
+        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)}
 
 
 
@@ -88,7 +86,7 @@ class IAMParagraphs(BaseDataModule):
 
     def setup(self, stage: str = None) -> None:
         """
-        Sets up the dataset for training, validation, and testing.
+        Sets  up the dataset for training, validation, and testing.
         """
         def _load_dataset(split: str, augment: bool) -> BaseDataset:
             """
