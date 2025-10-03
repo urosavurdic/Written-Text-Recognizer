@@ -5,6 +5,7 @@ import json
 import numpy as np
 from PIL import Image, ImageOps
 import torchvision.transforms as transforms
+from torchvision.transforms import InterpolationMode
 
 from text_recognizer.data.base_data_module import BaseDataModule, load_and_print_info
 from text_recognizer.data.emnist import EMNIST
@@ -269,7 +270,7 @@ def get_transform(image_shape: Tuple[int, int], augment: bool) -> transforms.Com
             transforms.RandomAffine(
                 degrees=1,
                 shear=(-10, 10),
-                resample=Image.BILINEAR,
+                interpolation=InterpolationMode.BILINEAR,
             ),
         ]
     else:
