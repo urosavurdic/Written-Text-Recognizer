@@ -87,7 +87,7 @@ class IAMParagraphs(BaseDataModule):
             """
             crops, labels = load_processed_crops_and_labels(split)
             X = [resize_image(crop, IMAGE_SCALE_FACTOR) for crop in crops]
-            Y = convert_str_to_labels(strings=labels, mapping=self.idx_to_char, length=self.output_dim[0])
+            Y = convert_str_to_labels(text=labels, char_to_idx=self.idx_to_char, max_length=self.output_dim[0])
             transform = get_transform(image_shape=self.dim[1:], augment=augment)  # type: ignore
             return BaseDataset(X, Y, transform=transform)
 
