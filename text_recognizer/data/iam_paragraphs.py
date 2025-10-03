@@ -33,7 +33,7 @@ class IAMParagraphs(BaseDataModule):
 
         char_to_idx = EMNIST().char_to_idx
         assert char_to_idx is not None
-        self.mapping = [*char_to_idx, NEW_LINE_TOKEN]
+        self.char_to_idx = [*char_to_idx, NEW_LINE_TOKEN]
         self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)}
 
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
