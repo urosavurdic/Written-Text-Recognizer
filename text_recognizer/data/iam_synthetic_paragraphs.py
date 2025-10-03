@@ -54,7 +54,7 @@ class IAMSyntheticParagraphs(IAMParagraphs):
         if stage == "fit" or stage is None:
             line_crops, line_labels = load_line_crops_and_labels("train_val", PROCESSED_DATA_DIRNAME)
             X, para_labels = generate_synthetic_paragraphs(line_crops=line_crops, line_labels=line_labels)
-            Y = convert_str_to_labels(strings=para_labels, mapping=self.idx_to_char, length=self.output_dim[0])
+            Y = convert_str_to_labels(text=para_labels, char_to_idx=self.idx_to_char, max_length=self.output_dim[0])
             transform = get_transform(image_shape=self.dim[1:], augment=self.augment)
             self.data_train = BaseDataset(X, Y, transform=transform)
 
