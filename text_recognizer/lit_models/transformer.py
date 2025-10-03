@@ -7,11 +7,11 @@ class TransformerModel(BaseModel):
     def __init__(self, model, args = None):
         super().__init__(model, args)
         self.char_to_idx = self.model.data_config["char_to_idx"]
-        idx_to_char = {val: ind for ind, val in enumerate(self.char_to_idx)}
-        start_index = idx_to_char["<S>"]
-        self.blank_index = idx_to_char["<B>"]
-        end_index = idx_to_char["<E>"]
-        padding_index = idx_to_char["<P>"]
+        self.idx_to_char = {idx: char for char, idx in self.char_to_idx.items()}
+        start_index = self.char_to_idx["<S>"]
+        self.blank_index = self.char_to_idx["<B>"]
+        end_index = self.char_to_idx["<E>"]
+        padding_index = self.char_to_idx["<P>"]
 
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_index)
 
@@ -37,7 +37,7 @@ class TransformerModel(BaseModel):
 
         pred = self.model.predict(x)
 
-        pred_str = "".join(self.char_to_idx[_] for _ in pred[0].tolist() if _ != 3)
+        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != 3)
         try:
             self.logger.experiment.log({"val_pred_examples": [wandb.Image(x[0], caption=pred_str)]})
         except AttributeError:
@@ -50,7 +50,7 @@ class TransformerModel(BaseModel):
         x, y = batch
         pred = self.model.predict(x)
 
-        pred_str = "".join(self.char_to_idx[_] for _ in pred[0].tolist() if _ != 3)
+        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != 3)
         try:
             self.logger.experiment.log({"test_pred_examples": [wandb.Image(x[0], caption=pred_str)]})
         except AttributeError:
