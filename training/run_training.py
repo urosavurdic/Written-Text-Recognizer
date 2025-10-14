@@ -15,7 +15,7 @@ import pytorch_lightning as pl
 #from pytorch_lightning.tuner import Tuner
 import wandb
 
-
+BEST_MODEL = str(Path(__file__).resolve().parents[1] / "text_recognizer" / "artifacts" / "line_text_recognizer" / "model.pt")
 from text_recognizer import lit_models
 
 np.random.seed(42)
@@ -45,20 +45,13 @@ def _setup_parser():
     trainer_parser = pl.Trainer.add_argparse_args(parser)
     trainer_parser._action_groups[1].title = "Trainer Args" 
     parser = argparse.ArgumentParser(add_help=False, parents=[trainer_parser])
-    """
-    parser.add_argument('--max_epochs', type=int, default=10)
-    parser.add_argument('--accelerator', type=str, default="cpu")   # use "gpu" if available
-    parser.add_argument('--devices', type=int, default=1)
-    parser.add_argument('--precision', type=int, default=32)
-    """
-    
-    #parser.add_argument("--wandb", action="store_true", default=False)
 
     # basic arguments
     parser.add_argument("--wandb", action="store_true", default=False)
     parser.add_argument('--data_class', type=str, default='EMNIST')
     parser.add_argument('--model_class', type=str, default='CNN')
     parser.add_argument("--load_checkpoint", type=str, default=None)
+    parser.add_argument("--pretrained_model", type=str, default=BEST_MODEL)
 
     # model specific arguments
     temp_arg, _ = parser.parse_known_args()
@@ -81,6 +74,9 @@ def main():
     """
     Main function to run the training script.
     python run_training.py --max_epochs 3 --gpus='0' --num_workers 4 --model_class=MLP --data_class=MNIST
+    
+    For fine-tuning:
+    python run_training.py --max_epochs 20 --model_class=ResnetTransformer --data_class=IAMParagraphs --pretrained_model=/path/to/model.pt
     """
     parser = _setup_parser()
     args = parser.parse_args()
@@ -90,10 +86,27 @@ def main():
     model_class = _import_class(f'text_recognizer.models.{args.model_class}')
     
     data = data_class(args)
-    #data.setup("fit") 
-    #print("Num classes:", data.num_classes)
-    #print("Max label in dataset:", max([int(y) for y in data.targets]))
     model = model_class(data_config=data.configuration(), args=args)
+
+    # Load pretrained weights if provided
+    if args.pretrained_model is not None:
+        print(f"Loading pretrained model from: {args.pretrained_model}")
+        pretrained_state_dict = torch.load(args.pretrained_model, map_location='cpu')
+        
+        # Handle case where state_dict is wrapped in 'model' key
+        if 'model' in pretrained_state_dict:
+            pretrained_state_dict = pretrained_state_dict['model']
+        
+        # Load state dict into model
+        try:
+            model.load_state_dict(pretrained_state_dict, strict=True)
+            print("Successfully loaded all pretrained weights")
+        except RuntimeError as e:
+            print(f"Warning: Some weights couldn't be loaded with strict=True: {e}")
+            print("Attempting non-strict load...")
+            model.load_state_dict(pretrained_state_dict, strict=False)
+            print("Loaded available pretrained weights (non-strict mode)")
+
     # choosing right model
     if args.loss not in ("ctc", "transformer"):
         lit_model_class = lit_models.BaseModel
@@ -101,8 +114,6 @@ def main():
         lit_model_class = lit_models.CTCModel
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerModel
-    
-    # num_classes = getattr(data, "num_classes", None) only for EMNIST MNIST and IAM
 
     # load from checkpoint
     if args.load_checkpoint is not None:
