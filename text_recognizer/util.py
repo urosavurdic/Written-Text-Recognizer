@@ -39,6 +39,16 @@ def compute_sha256(filename: Union[Path, str]):
     with open(filename, "rb") as f:
         return hashlib.sha256(f.read()).hexdigest()
 
+def read_b64_image(b64_string, grayscale=False):
+    """Load base64-encoded images."""
+    try:
+        _, b64_data = b64_string.split(",") 
+        image_file = BytesIO(base64.b64decode(b64_data))
+        return read_image_pil_file(image_file, grayscale)
+    except Exception as exception:
+        raise ValueError("Could not load image from b64 {}: {}".format(b64_string, exception)) from exception
+
+
 class TqdmUpTo(tqdm):
     """
     A tqdm progress bar that can be used to track the progress of file downloads.
