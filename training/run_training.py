@@ -15,7 +15,7 @@ import pytorch_lightning as pl
 #from pytorch_lightning.tuner import Tuner
 import wandb
 
-BEST_MODEL = str(Path(__file__).resolve().parents[1] / "text_recognizer" / "artifacts" / "line_text_recognizer" / "model.pt")
+BEST_MODEL = str(Path(__file__).resolve().parents[1] / "text_recognizer" / "artifacts" / "paragraph_text_recognizer" / "model.pt")
 from text_recognizer import lit_models
 
 np.random.seed(42)
