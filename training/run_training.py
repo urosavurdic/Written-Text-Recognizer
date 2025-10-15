@@ -99,7 +99,10 @@ def main():
     # Load checkpoint if provided
     if args.pretrained_model is not None:
         print(f"Resuming training from checkpoint: {args.pretrained_model}")
-        lit_model = lit_model_class.load_from_checkpoint(args.pretrained_model, args=args)
+        model = model_class(data_config=data.configuration(), args=args)
+        lit_model = lit_model_class.load_from_checkpoint(
+            args.pretrained_model, model=model, args=args
+        )
     else:
         lit_model = lit_model_class(model=model, args=args)
 
