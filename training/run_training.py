@@ -88,25 +88,6 @@ def main():
     data = data_class(args)
     model = model_class(data_config=data.configuration(), args=args)
 
-    # Load pretrained weights if provided
-    if args.pretrained_model is not None:
-        print(f"Loading pretrained model from: {args.pretrained_model}")
-        pretrained_state_dict = torch.load(args.pretrained_model, map_location='cpu')
-        
-        # Handle case where state_dict is wrapped in 'model' key
-        if 'model' in pretrained_state_dict:
-            pretrained_state_dict = pretrained_state_dict['model']
-        
-        # Load state dict into model
-        try:
-            model.load_state_dict(pretrained_state_dict, strict=True)
-            print("Successfully loaded all pretrained weights")
-        except RuntimeError as e:
-            print(f"Warning: Some weights couldn't be loaded with strict=True: {e}")
-            print("Attempting non-strict load...")
-            model.load_state_dict(pretrained_state_dict, strict=False)
-            print("Loaded available pretrained weights (non-strict mode)")
-
     # choosing right model
     if args.loss not in ("ctc", "transformer"):
         lit_model_class = lit_models.BaseModel
@@ -114,12 +95,14 @@ def main():
         lit_model_class = lit_models.CTCModel
     if args.loss == "transformer":
         lit_model_class = lit_models.TransformerModel
-
-    # load from checkpoint
-    if args.load_checkpoint is not None:
-        lit_model = lit_model_class.load_from_checkpoint(args.load_checkpoint, args=args, model=model)
+    
+    # Load checkpoint if provided
+    if args.pretrained_model is not None:
+        print(f"Resuming training from checkpoint: {args.pretrained_model}")
+        lit_model = lit_model_class.load_from_checkpoint(args.pretrained_model, args=args)
     else:
         lit_model = lit_model_class(model=model, args=args)
+
         
     logger = pl.loggers.TensorBoardLogger("training/logs")
     
@@ -133,7 +116,7 @@ def main():
     early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
     model_checkpoint_callback = pl.callbacks.ModelCheckpoint(
         filename="{epoch:03d}-{val_loss:.3f}-{val_cer:.3f}", monitor="val_loss", mode="min"
-    )
+    ) # save_top_k=1  # Save only the best model
     callbacks = [early_stopping_callback, model_checkpoint_callback]
 
     args.weight_summary = 'full' # print full model summary
