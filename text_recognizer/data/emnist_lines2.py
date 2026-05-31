@@ -147,7 +147,7 @@ class EMNISTLines2(BaseDataModule):
         DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
         with h5py.File(self.data_filename, "a") as f:
             x, y = create_dataset_of_images(num, samples_by_char, sentence_generator, self.min_overlap, self.max_overlap, self.dim)
-            y = convert_strings_to_labels(y, emnist.char_to_idx, length =MAX_OUTPUT_LENGTH)
+            y = convert_strings_to_labels(y, emnist.char_to_idx, length=MAX_OUTPUT_LENGTH)
             f.create_dataset(f"x_{split}", data=x, dtype="u1", compression="lzf")
             f.create_dataset(f"y_{split}", data=y, dtype="u1", compression="lzf")
         
