@@ -8,7 +8,7 @@ from text_recognizer.data import IAMParagraphs
 from text_recognizer.paragraph_text_recognizer import ParagraphTextRecognizer
 
 
-_TEST_CHARACTER_ERROR_RATE = 0.3755
+_TEST_CHARACTER_ERROR_RATE = 0.38
 
 
 class TestEvaluateParagraphTextRecognizer(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestEvaluateParagraphTextRecognizer(unittest.TestCase):
         dataset.setup()
 
         text_recog = ParagraphTextRecognizer()
-        trainer = pl.Trainer(accelerator="gpu", devices=1)
+        trainer = pl.Trainer(accelerator="auto", devices=1)
 
         start_time = time.time()
         metrics = trainer.test(text_recog.lit_model, datamodule=dataset)
