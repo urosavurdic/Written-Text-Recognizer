@@ -23,7 +23,7 @@ class ResnetTransformer(nn.Module):
         self.data_config = data_config
         self.input_dim = data_config["input_dim"]
         self.num_classes = len(data_config["char_to_idx"])
-        char_to_idx = {char: idx for idx, char in enumerate(data_config["char_to_idx"])}
+        char_to_idx = data_config["char_to_idx"]
         self.start_token = char_to_idx["<S>"]
         self.end_token = char_to_idx["<E>"]
         self.padding_token = char_to_idx["<P>"]
