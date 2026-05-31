@@ -51,8 +51,9 @@ class EMNIST(BaseDataModule):
         with open(ESSENTIALS_FILENAME) as f:
             essentials = json.load(f) # Load the essentials from the JSON file
 
-        self.char_to_idx = list(essentials['characters'])# Convert the character to index mapping to a list
-        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)} # inverse mapping for quick lookup
+        self.mapping = list(essentials['characters'])  # List of characters indexed by position (idx → char)
+        self.char_to_idx = {char: idx for idx, char in enumerate(self.mapping)}  # char → index mapping
+        self.idx_to_char = {idx: char for idx, char in enumerate(self.mapping)}  # index → char mapping
         self.transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]) # Normalize the images to have mean 0.1307 and std 0.3081
 
         self.dim = (1, *essentials['input_dim']) # extra dimension are added by the transforms

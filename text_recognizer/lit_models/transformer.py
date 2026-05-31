@@ -37,7 +37,8 @@ class TransformerModel(BaseModel):
 
         pred = self.model.predict(x)
 
-        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != 3)
+        padding_index = self.char_to_idx["<P>"]
+        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != padding_index)
         try:
             self.logger.experiment.log({"val_pred_examples": [wandb.Image(x[0], caption=pred_str)]})
         except AttributeError:
@@ -50,7 +51,8 @@ class TransformerModel(BaseModel):
         x, y = batch
         pred = self.model.predict(x)
 
-        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != 3)
+        padding_index = self.char_to_idx["<P>"]
+        pred_str = "".join(self.idx_to_char[_] for _ in pred[0].tolist() if _ != padding_index)
         try:
             self.logger.experiment.log({"test_pred_examples": [wandb.Image(x[0], caption=pred_str)]})
         except AttributeError:

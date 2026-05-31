@@ -120,21 +120,21 @@ class EMNISTLines(BaseDataModule):
         emnist.setup()
 
         if split == "train":
-            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_idx)
+            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.idx_to_char)
             num = self.num_train
 
         elif split == "val":
-            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.char_to_idx)
+            samples_by_char = get_samples_by_char(emnist.x_train_val, emnist.y_train_val, emnist.idx_to_char)
             num = self.num_val
 
         else:
-            samples_by_char = get_samples_by_char(emnist.x_test, emnist.y_test, emnist.char_to_idx)
+            samples_by_char = get_samples_by_char(emnist.x_test, emnist.y_test, emnist.idx_to_char)
             num = self.num_test
         
         DATA_DIRNAME.mkdir(parents=True, exist_ok=True)
         with h5py.File(self.data_filename, "a") as f:
             x, y = create_dataset_of_images(num, samples_by_char, sentence_generator, self.min_overlap, self.max_overlap, self.dim)
-            y = convert_strings_to_labels(y, emnist.idx_to_char, length = self.output_dim[0], with_start_end_tokens=self.with_start_end_tokens)
+            y = convert_strings_to_labels(y, emnist.char_to_idx, length = self.output_dim[0], with_start_end_tokens=self.with_start_end_tokens)
             f.create_dataset(f"x_{split}", data=x, dtype="u1", compression="lzf")
             f.create_dataset(f"y_{split}", data=y, dtype="u1", compression="lzf")
 

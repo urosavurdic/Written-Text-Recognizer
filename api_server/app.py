@@ -23,13 +23,13 @@ class ImageData(BaseModel):
     image: str  # base64 string
 
 @app.get("/")
-# Health check endpoint
 async def index():
+    """Health check endpoint."""
     return {"message": "Text Recognizer API is running."}
 
 @app.post("/v1/predict")
-# Prediction endpoint
 async def predict(image_data: ImageData):
+    """Predict text from a base64-encoded image payload."""
     try:
         image = util.read_b64_image(image_data.image, grayscale=True)
         return await _predict_and_log(image)
@@ -39,6 +39,7 @@ async def predict(image_data: ImageData):
 
 @app.get("/v1/predict")
 async def predict_get(image_url: str = Query(..., description="URL of the image to be processed")):
+    """Predict text from an image URL."""
     try:
         logging.info(f"Fetching image from URL: {image_url}")
         image = util.read_image_pil(image_url, grayscale=True)
@@ -74,5 +75,3 @@ async def _predict_and_log(image):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("api_server.app:app", host="0.0.0.0", port=8000)
-
-    

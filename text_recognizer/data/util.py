@@ -51,8 +51,7 @@ class BaseDataset(torch.utils.data.Dataset):
         
         return data_item, target_item
     
-# NOTE: Where the f is this used? 
-def convert_str_to_labels(text: str, char_to_idx: Dict[str, int], max_length: int) -> torch.Tensor:
+def convert_str_to_labels(text: Sequence[str], char_to_idx: Dict[str, int], max_length: int) -> torch.Tensor:
     """
     Converts a string to a tensor of labels based on a character-to-index mapping.
     The mapping should include special tokens for:

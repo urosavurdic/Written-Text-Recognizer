@@ -31,7 +31,7 @@ class IAMParagraphs(BaseDataModule):
     def __init__(self, args: argparse.Namespace = None):
         super().__init__(args)
         self.augment = self.args.get("augment_data", "true").lower() == "true"
-        emnist_chars = EMNIST().char_to_idx  # This is actually a list!
+        emnist_chars = EMNIST().mapping  # List of characters indexed by position
         assert emnist_chars is not None
         all_chars = list(emnist_chars) + [NEW_LINE_TOKEN]
         self.char_to_idx = {char: idx for idx, char in enumerate(all_chars)}

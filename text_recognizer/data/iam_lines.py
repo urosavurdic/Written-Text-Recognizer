@@ -30,8 +30,9 @@ class IAMLines(BaseDataModule):
     def __init__(self, args: argparse.Namespace = None):
         super().__init__(args)
         self.augment = self.args.get("augment_data", "true") == "true"
-        self.char_to_idx = EMNIST().char_to_idx
-        self.idx_to_char = {v: k for k, v in enumerate(self.char_to_idx)}
+        self.mapping = EMNIST().mapping
+        self.char_to_idx = {char: idx for idx, char in enumerate(self.mapping)}
+        self.idx_to_char = {idx: char for idx, char in enumerate(self.mapping)}
         self.dim = (1, IMAGE_HEIGHT, IMAGE_WIDTH)  # We assert that this is correct in setup()
         self.output_dim = (89, 1)  # We assert that this is correct in setup()
 
