@@ -17,5 +17,7 @@ COPY api_serverless/app.py ./app.py
 # Expose port for FastAPI
 EXPOSE 8000
 
+ENV PYTHONPATH=/app
+
 # Start FastAPI server
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 
 import torch
 import pytorch_lightning as pl
-#from pytorch_lightning.tuner import Tuner
 import wandb
 
 BEST_MODEL = str(Path(__file__).resolve().parents[1] / "text_recognizer" / "artifacts" / "paragraph_text_recognizer" / "model.pt")
@@ -106,15 +105,12 @@ def main():
     else:
         lit_model = lit_model_class(model=model, args=args)
 
-        
     logger = pl.loggers.TensorBoardLogger("training/logs")
     
     if args.wandb:
         logger = pl.loggers.WandbLogger()
         logger.watch(model)
         logger.log_hyperparams(vars(args))
-
-    
 
     early_stopping_callback = pl.callbacks.EarlyStopping(monitor="val_loss", mode="min", patience=10)
     model_checkpoint_callback = pl.callbacks.ModelCheckpoint(
@@ -124,7 +120,6 @@ def main():
 
     args.weight_summary = 'full' # print full model summary
     trainer_kwargs = {
-        #"wandb": args.wandb,
         "max_epochs": args.max_epochs,
         "accelerator": args.accelerator,
         "devices": args.devices,
@@ -133,10 +128,8 @@ def main():
         "callbacks": callbacks,
         "enable_checkpointing": True,  # to ensure ModelCheckpoint works
     }
-
     trainer = pl.Trainer(**trainer_kwargs)
-    #trainer = pl.Trainer(**trainer_args, callbacks=callbacks, logger=logger, weights_save_path="training/logs")
-    
+
     trainer.tune(lit_model, datamodule=data)  # If passing --auto_lr_find, this will set learning rate
 
     trainer.fit(lit_model, datamodule=data)
@@ -153,4 +146,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-

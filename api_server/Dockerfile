@@ -6,8 +6,7 @@ WORKDIR /repo
 
 # Copy and install dependencies
 COPY requirements.txt .
-RUN sed -i 's/cu101/cpu/' requirements.txt && \
-    pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy relevant directories

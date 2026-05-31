@@ -22,14 +22,16 @@ logging.basicConfig(level=logging.INFO)
 class ImageData(BaseModel):
     image: str  # base64 string
 
+
 @app.get("/")
-# Health check endpoint
 async def index():
+    """Health check endpoint."""
     return {"message": "Text Recognizer API is running."}
 
+
 @app.post("/v1/predict")
-# Prediction endpoint
 async def predict(image_data: ImageData):
+    """Prediction endpoint for base64-encoded image payloads."""
     try:
         image = util.read_b64_image(image_data.image, grayscale=True)
         return await _predict_and_log(image)
@@ -70,9 +72,8 @@ async def _predict_and_log(image):
     except Exception as e:
         logging.error(f"Error during prediction: {e}")
         return JSONResponse(status_code=500, content={"error": "An error occurred during prediction."})
-    
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api_server.app:app", host="0.0.0.0", port=8000)
 
-    
+    uvicorn.run("api_server.app:app", host="0.0.0.0", port=8000)
