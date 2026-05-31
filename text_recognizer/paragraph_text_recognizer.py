@@ -20,9 +20,15 @@ class ParagraphTextRecognizer:
     def __init__(self):
         data = IAMParagraphs()
         self.char_to_idx = data.char_to_idx
-        idx_to_char = data.idx_to_char
-        self.ignore_tokens = [idx_to_char["<S>"], idx_to_char["<B>"], idx_to_char["<E>"], idx_to_char["<P>"]]
-        self.transform = get_transform(image_shape=data.dims[1:], augment=False)
+        self.idx_to_char = data.idx_to_char
+        self.mapping = [self.idx_to_char[i] for i in range(len(self.idx_to_char))]
+        self.ignore_tokens = [
+            self.char_to_idx["<S>"],
+            self.char_to_idx["<B>"],
+            self.char_to_idx["<E>"],
+            self.char_to_idx["<P>"],
+        ]
+        self.transform = get_transform(image_shape=data.dim[1:], augment=False)
 
         with open(CONFIG_AND_WEIGHTS_DIRNAME / "config.json", "r") as file:
             config = json.load(file)
@@ -72,6 +78,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 

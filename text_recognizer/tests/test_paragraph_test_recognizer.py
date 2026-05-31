@@ -28,6 +28,8 @@ def test_paragraph_text_recognizer():
     text_recognizer = ParagraphTextRecognizer()
     end_time = time.time()
     print(f"Time taken to initialize ParagraphTextRecognizer: {round(end_time - start_time, 2)}s")
+    assert isinstance(text_recognizer.mapping, list)
+    assert text_recognizer.mapping[text_recognizer.char_to_idx["<S>"]] == "<S>"
 
     for i, support_filename in enumerate(support_filenames):
         if i >= _NUM_MAX_SAMPLES:
