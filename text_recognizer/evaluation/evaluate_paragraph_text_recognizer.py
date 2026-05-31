@@ -23,7 +23,7 @@ class TestEvaluateParagraphTextRecognizer(unittest.TestCase):
         dataset.setup()
 
         text_recog = ParagraphTextRecognizer()
-        trainer = pl.Trainer(gpus=1)
+        trainer = pl.Trainer(accelerator="gpu", devices=1)
 
         start_time = time.time()
         metrics = trainer.test(text_recog.lit_model, datamodule=dataset)

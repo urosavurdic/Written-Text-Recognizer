@@ -69,13 +69,30 @@ python training/run_training.py --max_epochs 20 --model_class=ResnetTransformer 
 
 Artifacts are loaded from `text_recognizer/artifacts/paragraph_text_recognizer/` for inference.
 
-## Results [RESULTS TBD]
+## Results
 
 | Metric | Value |
 |---|---|
-| Character Error Rate (CER) | [RESULTS TBD] |
-| Validation Loss | [RESULTS TBD] |
-| Notes | [RESULTS TBD] |
+| Character Error Rate (CER) | 0.38 |
+| Notes | Evaluated on IAM Paragraphs test set |
+
+## Demo
+
+Running the CLI on a sample image:
+
+```bash
+$ python text_recognizer/paragraph_text_recognizer.py text_recognizer/tests/support/paragraphs/a01-077.png
+And, since this is election year in West
+Germany, Dr. Adenauer is in a tough
+spot. Joyce Egginton cables: President
+Kennedy at his Washington Press con-
+ference admitted he did not know
+whether America was lagging behind
+Russia in missile power. He said he
+was waiting for his senior military
+aides to come up with the answer on
+February 20.
+```
 
 ## Tech Stack
 

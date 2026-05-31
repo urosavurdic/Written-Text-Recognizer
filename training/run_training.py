@@ -88,12 +88,12 @@ def main():
     model = model_class(data_config=data.configuration(), args=args)
 
     # choosing right model
-    if args.loss not in ("ctc", "transformer"):
-        lit_model_class = lit_models.BaseModel
     if args.loss == "ctc":
         lit_model_class = lit_models.CTCModel
-    if args.loss == "transformer":
+    elif args.loss == "transformer":
         lit_model_class = lit_models.TransformerModel
+    else:
+        lit_model_class = lit_models.BaseModel
     
     # Load checkpoint if provided
     if args.pretrained_model is not None:
